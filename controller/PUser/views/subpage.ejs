@@ -1,0 +1,367 @@
+<script id="table_add_edit" type="text/html">
+    <form id="table_add_edit" class="form-horizontal" role="form">
+        <div class="form-group" style="display: none">
+            <label class="control-label col-xs-4 col-sm-3">编辑id</label>
+            <div class="col-xs-8 col-sm-9 lbl-star">
+                <input name="id" type="text" class="form-control ">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-6">
+                <label class="control-label col-xs-4 col-sm-3">登录名</label>
+                <div class="col-xs-8 col-sm-9 lbl-star">
+                    <input name="login_name" type="text" class="form-control lbl-edit-disable">
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <label class="control-label col-xs-3 col-sm-2">密码</label>
+                <div class="col-xs-8 col-sm-9 lbl-star">
+                    <input name="login_pwd" type="text" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-6">
+                <label class="control-label col-xs-4 col-sm-3">用户名</label>
+                <div class="col-xs-8 col-sm-9 lbl-star">
+                    <input name="user_name" type="text" class="form-control ">
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <label class="control-label col-xs-3 col-sm-2">状态</label>
+                <div class="col-xs-8 col-sm-9 lbl-star">
+                    <select name="status" class="form-control">
+                        <option value="0">启用</option>
+                        <option value="1">禁用</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-6">
+                <label class="control-label col-xs-4 col-sm-3">部门</label>
+                <div class="col-xs-8 col-sm-9 lbl-star">
+                    <select name="department_id" class="form-control">
+                        <% for(let i = 0, j = department.length;i < j;i++){ %>
+                            <option value="<%= department[i].id %>"><%= department[i].department_name %></option>
+                        <% } %>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <label class="control-label col-xs-3 col-sm-2">类型</label>
+                <div class="col-xs-8 col-sm-9 lbl-star">
+                    <select name="emp_type" class="form-control">
+                        <option value="2">组员</option>
+                        <option value="1">组长</option>
+                        <option value="3">独立写作</option>
+                        <option value="4">发布员</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-6">
+                <label class="control-label col-xs-4 col-sm-3">手机号</label>
+                <div class="col-xs-8 col-sm-9">
+                    <input name="mobile" type="text" class="form-control">
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <label class="control-label col-xs-3 col-sm-2">email</label>
+                <div class="col-xs-8 col-sm-9">
+                    <input name="email" type="text" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-6">
+                <label class="control-label col-xs-4 col-sm-3">备注</label>
+                <div class="col-xs-8 col-sm-9">
+                    <input name="memo" type="text" class="form-control">
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
+<!--设置下级-->
+<script id="modal_set_employee" type="text/html">
+    <div class="parent">
+        <div class="side pull-left">
+            <div class="header">
+                <div class="list-row">未加入的人员</div>
+                <div class="list-row search">
+                    <div class="icon-search"></div>
+                    <input class="form-control">
+                </div>
+            </div>
+            <div class="left-body"></div>
+        </div>
+        <div class="middle text-center">
+            <div class="middle-div">
+                <button type="button" class="btn btn-sm btn-default middle-button right-button disabled"
+                        disabled></button>
+                <button type="button" class="btn btn-sm btn-default middle-button left-button disabled"
+                        disabled></button>
+            </div>
+        </div>
+        <div class="side pull-right">
+            <div class="header">
+                <div class="list-row">已加入的人员</div>
+            </div>
+            <div class="right-body"></div>
+        </div>
+    </div>
+</script>
+<div id="user_scene1" class="container-fluid">
+    <h3>用户管理</h3>
+    <div id="lbl-table-tools" class="lbl-table-tools">
+        <div class="form-inline" role="form">
+            <div class="form-group">
+                <button id="btn_add" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i>新增</button>
+                <button id="btn_edit" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i>修改</button>
+                <button id="btn_del" class="btn btn-default"><i class="glyphicon glyphicon-trash"></i>删除</button>
+                <button id="btn_authority" class="btn btn-default" data-url="/PUser/user/authority">
+                    <i class="glyphicon glyphicon-wrench"></i>权限
+                </button>
+                <button id="btn_employee" type="button" class="btn btn-default">
+                    <i class="glyphicon glyphicon-plus"></i>设置下属
+                </button>
+            </div>
+            <form id="btn_search_form" style="display: inline-block">
+                <div class="form-group">
+                    <label class="control-label">最后登录时间</label>
+                    <div id='start_date' class='input-group date'>
+                        <input name="start_date" type='text' class="form-control"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">至</label>
+                    <div id='end_date' class='input-group date'>
+                        <input name="end_date" type='text' class="form-control"/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input name="search" class="form-control" type="text" placeholder="登录名或用户名">
+                </div>
+                <div class="form-group">
+                    <button id="btn_search" class="btn btn-primary search" type="button">查询</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <table id="table" data-tools="#lbl-table-tools"></table>
+</div>
+<div id="user_scene2" class="container-fluid hidden">
+    <div class="lbl-user-page">
+        <span id="btn_return" class="return">返回</span>
+        <span id="authority_title" class="title">设置权限-</span>
+    </div>
+    <div id="div_authority"></div>
+</div>
+<script>
+    $(function () {
+        let $table = $("#table");
+        let $start_date = $("#start_date");
+        let $end_date = $("#end_date");
+        let department = $.parseJSON('<%- JSON.stringify(department) %>');
+        let date_options = {
+            startView: "month",
+            minView: "hour",
+            maxView: "day"
+        }
+        initDateInput($start_date, date_options, '');
+        initDateInput($end_date, date_options, '');
+        let modalForm = template("table_add_edit", {});
+        let options = {};
+        options.url = "/PUser/user/list";
+        options.singleSelect = true;
+        options.columns = [{
+            checkbox: true
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: true,
+            field: 'login_name',
+            titleTooltip: "color:red",
+            switchable: false,
+            title: '登录名'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: true,
+            field: 'login_pwd',
+            title: '密码'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: true,
+            field: 'user_name',
+            title: '用户名'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'status',
+            title: '状态',
+            formatter: function (value) {
+                let _re = "未知状态";
+                if (value == 0) {
+                    _re = "启用"
+                } else if (value == 1) {
+                    _re = "<span style='color: red'>禁用</span>"
+                }
+                return _re;
+            }
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'login_count',
+            title: '登录次数'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'department_id',
+            title: '部门',
+            formatter: function (value) {
+                let _re = undefined;
+                for (let i = 0, j = department.length; i < j; i++) {
+                    if (value == department[i]["id"]) {
+                        _re = department[i]["department_name"];
+                        break;
+                    }
+                }
+                return _re;
+            }
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'emp_type',
+            title: '类型',
+            formatter: function (value) {
+                let _re = '位置类型';
+                if (value == 1) _re = '组长';
+                if (value == 2) _re = '组员';
+                if (value == 3) _re = '独立写作';
+                if (value == 4) _re = '发布员';
+                return _re;
+            }
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'last_login_time',
+            title: '最后登录时间',
+            formatter: function (value) {
+                return moment(value).utcOffset(8).format("YYYY-MM-DD HH:mm:ss")
+            }
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'last_login_ip',
+            title: '最后登录IP'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'mobile',
+            title: '电话'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'email',
+            title: '邮箱'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'memo',
+            title: '备注'
+        }, {
+            halign: "center",
+            align: "center",
+            sortable: false,
+            field: 'created_at',
+            title: '创建时间'
+        }];
+        let table = new InitTableNew($table, options);
+        table.search.setParams({button: $("#btn_search"), message: $("#btn_search_form"), isModal: false});
+        table.del.setParams({
+            title: "删除用户",
+            message: "确认要删除的选中用户？",
+            size: "small",
+            button: $("#btn_del"),
+            url: "/PUser/user/del"
+        });
+        table.update.setParams({
+            title: "修改用户",
+            form_button_ok: "保存",
+            button: $("#btn_edit"),
+            message: modalForm,
+            url: "/PUser/user/edit"
+        });
+        table.add.setParams({
+            title: "添加用户",
+            form_button_ok: "保存",
+            button: $("#btn_add"),
+            message: modalForm,
+            url: "/PUser/user/add"
+        });
+        table.init();
+        // -----------开启设置权限-----------
+        $("#btn_authority").click(function () {
+            let rows = $table.bootstrapTable("getSelections");
+            if (rows.length !== 1) {
+                tipbox.warning("请先选中一个用户！");
+                return false;
+            }
+            let row = rows[0];
+            $("#authority_title").text("设置权限-" + row["user_name"]);
+            let url = $(this).data("url");
+            $("#user_scene1").addClass("hidden");
+            $("#user_scene2").removeClass("hidden");
+            $("#div_authority").load(url, row);
+        });
+        $("#btn_return").click(function () {
+            $("#user_scene1").removeClass("hidden");
+            $("#user_scene2").addClass("hidden");
+        });
+        $("#btn_employee").click(function () {
+            let judge = table.judgeSelectRow();
+            if (judge == false) return false;
+            let row = table.getTableSelectRows()[0];
+            let employee = new Employee();
+            let dialog = bootbox.dialog({
+                title: "设置组员",
+                className: "modal-move",
+                message: template("modal_set_employee", {}),
+                buttons: {
+                    concel: {
+                        label: "取消"
+                    },
+                    ok: {
+                        label: "保存",
+                        callback: function () {
+                            employee.saveEmployee(dialog);
+                            return false;
+                        }
+                    }
+                }
+            });
+            dialog.init(function () {
+                employee.init(row["id"]);
+            });
+        });
+    });
+</script>

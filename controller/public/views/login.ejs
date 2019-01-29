@@ -1,0 +1,38 @@
+<%- include ../../../views/header.ejs %>
+<div class="lbl-login">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>运维管理系统</h2>
+            </div>
+        </div>
+        <form class="form-horizontal" method="post" action="/public/login" role="form">
+            <div class="form-group">
+                <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4">
+                    <input name="login_name" type="text" class="form-control" style="height: 40px"
+                           placeholder="请输入登录名">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4">
+                    <input name="login_pwd" type="password" class="form-control" style="height: 40px"
+                           placeholder="请输入登录密码">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4">
+                    <input type="submit" class="btn bg-primary btn-block" value="登录">
+                </div>
+            </div>
+            <% if(status !== "success"){ %>
+            <div class="form-group">
+                <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4"
+                     style="color: red;font-size: 16px">
+                    <p><%= msg %></p>
+                </div>
+            </div>
+            <% } %>
+        </form>
+    </div>
+</div>
+<%- include ../../../views/footer.ejs %>

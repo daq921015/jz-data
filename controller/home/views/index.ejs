@@ -1,0 +1,12 @@
+<% if(!isJson){ %>
+<%- include ../../../views/header.ejs %>
+<%- include ../../../views/sidebar.ejs %>
+<%- include ../../../views/menu.ejs %>
+<!--主区域-->
+<div class="lbl-content">
+    <% } %>
+    首页内容
+    <% if(!isJson){ %>
+</div>
+<%- include ../../../views/footer.ejs %>
+<% } %>

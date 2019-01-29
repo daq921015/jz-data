@@ -1,0 +1,118 @@
+<div id="role_tools" class="lbl-table-tools">
+    <div class="form-inline" role="form">
+        <div class="form-group">
+            <button type="button" id="employee_add_role" class="btn btn-default displayTable"
+                    data-url="/PUser/role/add" title="员工添加角色">
+                <i class="glyphicon glyphicon-plus"></i>增添角色
+            </button>
+            <button type="button" class="btn btn-default del" data-url="/PUser/role/del"
+                    title="员工移出角色">
+                <i class="glyphicon glyphicon-minus"></i>移出角色
+            </button>
+            <button type="button" class="btn btn-default btn-sm hidden-md hidden-lg toggle">
+                <i class="glyphicon glyphicon-list-alt icon-list-alt"></i>
+            </button>
+        </div>
+        <form style="display: inline-block">
+            <div class="form-group">
+                <input style="display: none">
+                <input name="search" class="form-control" type="text" placeholder="名称">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary search" type="button">查询</button>
+            </div>
+        </form>
+    </div>
+</div>
+<table id="role_table" data-tools="#role_tools"></table>
+<div id="add_role_tools" style="display: none">
+    <div id="modal_role_tools" class="lbl-table-tools">
+        <form class="form-inline" role="form" style="display: inline-block">
+            <div class="form-group">
+                <input style="display: none">
+                <input name="search" class="form-control" type="text" placeholder="名称" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary search" type="button">查询</button>
+            </div>
+        </form>
+    </div>
+    <table data-tools="#modal_role_tools"></table>
+</div>
+<script>
+    $(function () {
+        //------------获取元素-------------------
+        let $role_table = $("#role_table");
+        let $add_role_tools = $("#add_role_tools");
+        let $employee_add_role = $("#employee_add_role");//添加员工按钮
+        let $authorityUser = $("#authorityUser");
+        //---------------END--------------------
+        let options = {};
+        let user_id = $authorityUser.find("input[name='id']").val();
+        options.url = "/PUser/role/list";
+        options.queryParams = function (params) {
+            let form_array = $("#role_tools").find("form").serializeForm();
+            return $.extend({
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                sortName: params.sortName,
+                sortOrder: params.sortOrder,
+                user_id: user_id
+            }, form_array || {});
+        };
+        options.columns = [{
+            checkbox: true
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'role_name',
+            title: '角色名称'
+        }];
+        initTable($role_table, options);
+        //------弹出框表初始化参数-----------------
+        let $modal_form = $add_role_tools.find("form");
+        let modal_table_options = {};
+        modal_table_options.url = "/PUser/role/addlist";
+        modal_table_options.queryParams = function (params) {
+            let form_array = $modal_form.serializeForm();
+            return $.extend({
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                sortName: params.sortName,
+                sortOrder: params.sortOrder,
+                user_id: user_id
+            }, form_array || {});
+        };
+        modal_table_options.columns = [{
+            checkbox: true
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'role_name',
+            title: '角色名称'
+        }];
+        $employee_add_role.click(function () {
+            initModalTable($add_role_tools, modal_table_options, function (rows) {
+                if (_.isEmpty(rows)) {
+                    tipbox.error("添加失败：前端")
+                    return false;
+                }
+                let ids = _.pluck(rows, "id");
+                let url = $employee_add_role.data("url");
+                $.ajaxForm({
+                    url: url,
+                    method: "post",
+                    data: {"id": ids, user_id: user_id},
+                    success: function (data) {
+                        tipbox.ainfo(data);
+                        $role_table.bootstrapTable("refresh");
+                    }
+                });
+            })
+        });
+    });
+</script>

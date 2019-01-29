@@ -1,0 +1,64 @@
+<div class="lbl-navbar">
+    <div class="button fa fa-bars" title="隐藏/显示"></div>
+    <div class="button pull-right" data-box="#user_box" title="用户信息">
+        <div class="user-img small"></div>
+        <span><%= user["user_name"] %></span>
+        <div class="fa fa-caret-down"></div>
+    </div>
+    <a href="/public/logout" class="button pull-right glyphicon glyphicon-log-out" style="color: white" title="注销"></a>
+    <div id="user_box" class="user-box" style="display: none">
+        <div class="header">
+            <div class="user-img large"></div>
+            <div class="title">欢迎使用运维系统</div>
+        </div>
+        <div class="footer">
+            <div class="row">
+                <div class="col-xs-6">
+                    <a id="user_pwd_edit" href="javascript:void(0)" class="lbl-user-footer-a">修改登录密码</a>
+                </div>
+                <div class="col-xs-6">
+                    <a href="javascript:void(0)" class="lbl-user-footer-a">更改头像</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form id="form_pwd_edit" class="form-horizontal" role="form" style="display: none">
+    <div class="form-group">
+        <label class="control-label col-xs-3">原密码</label>
+        <div class="col-xs-7 lbl-star">
+            <input name="old_pwd" class="form-control" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3">新密码</label>
+        <div class="col-xs-7 lbl-star">
+            <input name="new_pwd" class="form-control" type="text">
+        </div>
+    </div>
+</form>
+<script>
+    $(function () {
+        let $user_pwd_edit = $("#user_pwd_edit");
+        let $form_pwd_edit = $("#form_pwd_edit");
+        $user_pwd_edit.click(function () {
+            tipbox.dialog({
+                title: "修改登录密码",
+                btn_concel: "取消",
+                btn_ok: "保存",
+                body_content: $form_pwd_edit,
+                submit: function ($btn_ok, $modal) {
+                    $form_pwd_edit.ajaxForm({
+                        url: "/PUser/user/pwd",
+                        method: "post",
+                        success: function (data) {
+                            tipbox.ainfo(data);
+                            $modal.modal("hide");
+                        },
+                        btn: $btn_ok
+                    });
+                }
+            });
+        });
+    });
+</script>

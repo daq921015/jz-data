@@ -1,0 +1,36 @@
+<div class="lbl-sidebar open" onselectstart="return false;">
+    <div class="logo">
+        <div class="mini">运维</div>
+        <div class="open">运维控制台</div>
+    </div>
+    <div class="main-menu">
+        <!--没有子菜单的父菜单class为child-->
+        <% for(let key in menu){ %>
+        <div class="<%= sub_menu.hasOwnProperty(key) ? 'father' : 'child' %>"
+             data-url="<%= menu[key]["privilege_url"] %>"
+             data-privilege-id="<%= menu[key]["id"] %>">
+            <div class="icon <%= menu[key]["label_class"] %>"></div>
+            <div class="title"><%= menu[key]["privilege_name"] %></div>
+        </div>
+        <% if(sub_menu.hasOwnProperty(key)){ %>
+        <div class="sub-menu" style="display: none">
+            <% for(let key2 in sub_menu[key]){ %>
+            <div class="child" data-url="<%= sub_menu[key][key2]["privilege_url"] %>"
+                 data-privilege-id="<%= sub_menu[key][key2]["id"] %>">
+                <div class="icon <%= sub_menu[key][key2]["label_class"] %>"></div>
+                <div class="title"><%= sub_menu[key][key2]["privilege_name"] %></div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+        <% } %>
+    </div>
+</div>
+<script>
+    $(function () {
+        let $menu_first = $(".lbl-sidebar>.main-menu>.child:eq(0)");
+        if ($menu_first.length > 0) {
+            $menu_first.click();
+        }
+    });
+</script>

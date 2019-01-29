@@ -1,0 +1,196 @@
+<div class="container-fluid">
+    <div id="employee_tools" class="lbl-table-tools">
+        <div class="form-inline" role="form">
+            <div class="form-group">
+                <button type="button" id="department_add_employee" class="btn btn-default"
+                        data-url="/PDeparment/employee/add" title="部门添加员工">
+                    <i class="glyphicon glyphicon-plus"></i>增添员工
+                </button>
+                <button type="button" class="btn btn-default del" data-url="/PDeparment/employee/del"
+                        title="部门移出员工">
+                    <i class="glyphicon glyphicon-minus"></i>移出员工
+                </button>
+                <button type="button" class="btn btn-default btn-sm hidden-md hidden-lg toggle">
+                    <i class="glyphicon glyphicon-list-alt icon-list-alt"></i>
+                </button>
+            </div>
+            <form style="display: inline-block">
+                <div class="form-group">
+                    <input style="display: none">
+                    <input name="search" class="form-control" type="text" placeholder="登录名或用户名">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary search" type="button">查询</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <table id="employee_table" data-tools="#employee_tools"></table>
+</div>
+<div id="add_employee_tools" style="display: none">
+    <div id="modal_employee_tools" class="lbl-table-tools">
+        <form class="form-inline" role="form" style="display: inline-block">
+            <div class="form-group">
+                <input style="display: none">
+                <input name="search" class="form-control" type="text" placeholder="名称" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary search" type="button">查询</button>
+            </div>
+        </form>
+    </div>
+    <table data-tools="#modal_employee_tools"></table>
+</div>
+<script>
+    $(function () {
+        //------------获取元素-------------------
+        let $employee_table = $("#employee_table");//员工table
+        let $treeNode = $("#treeNode");//选中树节点 内容
+        let $add_employee_tools = $("#add_employee_tools");
+        let $department_add_employee = $("#department_add_employee");//添加员工按钮
+        //---------------END--------------------
+        let options = {};
+        let node_id = $treeNode.find("input[name='id']").val();
+        let node_ids = $treeNode.find("input[name='node_ids']").val();
+        let node_is_parent = $treeNode.find("input[name='isParent']").val();
+        //------组织员工表初始化参数-----------------
+        options.url = "/PDeparment/employee/list";
+        //删除按钮相关操作
+        options["del"] = {
+            before: function ($button) {
+                if (node_is_parent === "true") {
+                    tipbox.warning("该部门具有子部门，无法移出员工！");
+                    return false;
+                }
+                return true;
+            },
+            params: {
+                node_id: node_id
+            }
+        };
+        options.queryParams = function (params) {
+            let form_array = $("#employee_tools").find("form").serializeForm();
+            return $.extend({
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                sortName: params.sortName,
+                sortOrder: params.sortOrder,
+                node_id: node_id,
+                node_ids: node_ids
+            }, form_array || {});
+        };
+        options.columns = [{
+            checkbox: true
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'login_name',
+            title: '登录名'
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'user_name',
+            title: '用户名'
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'status',
+            title: '状态',
+            formatter: function (value) {
+                let _re = "未知状态";
+                if (value === 0) {
+                    _re = "启用"
+                } else if (value === 1) {
+                    _re = "<span style='color: red'>禁用</span>"
+                }
+                return _re;
+            }
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'department_name',
+            title: '部门'
+        }]
+        initTable($employee_table, options);
+        //------弹出框表初始化参数-----------------
+        let $modal_form = $add_employee_tools.find("form");
+        let modal_table_options = {};
+        modal_table_options.title = "选择员工"
+        modal_table_options.url = "/PDeparment/employee/addlist";
+        modal_table_options.queryParams = function (params) {
+            let form_array = $modal_form.serializeForm();
+            return $.extend({
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                sortName: params.sortName,
+                sortOrder: params.sortOrder,
+                node_id: node_id,
+                node_ids: node_ids
+            }, form_array || {});
+        };
+        modal_table_options.columns = [{
+            checkbox: true
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'login_name',
+            title: '登录名'
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'user_name',
+            title: '用户名'
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'status',
+            title: '状态',
+            formatter: function (value) {
+                let _re = "未知状态";
+                if (value === 0) {
+                    _re = "启用"
+                } else if (value === 1) {
+                    _re = "<span style='color: red'>禁用</span>"
+                }
+                return _re;
+            }
+        }]
+        $department_add_employee.click(function () {
+            if (node_is_parent === "true") {
+                tipbox.warning("选中部门具有子部门无法增添员工！");
+                return false;
+            }
+            initModalTable($add_employee_tools, modal_table_options, function (rows) {
+                if (_.isEmpty(rows)) {
+                    tipbox.error("添加失败：前端")
+                    return false;
+                }
+                let ids = _.pluck(rows, "id");
+                let url = $department_add_employee.data("url");
+                $.ajaxForm({
+                    url: url,
+                    method: "post",
+                    data: {"id": ids, "node_id": node_id},
+                    success: function (data) {
+                        tipbox.ainfo(data);
+                        $employee_table.bootstrapTable("refresh");
+                    }
+                });
+            })
+        });
+    });
+</script>

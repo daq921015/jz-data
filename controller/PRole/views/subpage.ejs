@@ -1,0 +1,108 @@
+<div class="sidebar open">
+    <div class="header">
+        <div class="title">角色管理</div>
+    </div>
+    <div class="body-box">
+        <div class="body">
+            <ul id="role_tree" data-url="/PRole/role/list" data-select="/PRole/role/select"
+                data-select-param="id,parent_id,name,isParent,level" data-tools="#role_tree_menu" class="ztree">
+            </ul>
+        </div>
+    </div>
+    <div class="pointer" title="隐藏/显示"></div>
+</div>
+<div class="main"></div>
+<ul id="role_tree_menu" class="lbl-context-menu">
+    <li class="add" data-form="#tree_add" data-url="/PRole/role/add">
+        <div class="icon glyphicon glyphicon-plus"></div>
+        <div class="title">添加子角色</div>
+    </li>
+    <li class="edit" data-form="#tree_edit" data-url="/PRole/role/edit">
+        <div class="icon glyphicon glyphicon-edit"></div>
+        <div class="title">修改选中角色</div>
+    </li>
+    <li class="del" data-url="/PRole/role/del">
+        <div class="icon glyphicon glyphicon-trash"></div>
+        <div class="title">删除选中角色</div>
+    </li>
+</ul>
+<form id="tree_add" class="form-horizontal" style="display: none">
+    <div class="form-group" style="display: none">
+        <label class="control-label col-xs-3">父节点id</label>
+
+        <div class="col-xs-8">
+            <input name="parent_id" type="text" class="form-control" readonly>
+        </div>
+    </div>
+    <div class="form-group" style="display: none">
+        <label class="control-label col-xs-3">父层级</label>
+
+        <div class="col-xs-8">
+            <input name="parent_level" type="text" class="form-control" readonly>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3">父角色</label>
+
+        <div class="col-xs-8">
+            <input name="parent_name" type="text" class="form-control" readonly>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3">角色名称</label>
+
+        <div class="col-xs-8">
+            <input name="role_name" type="text" class="form-control">
+        </div>
+    </div>
+</form>
+<form id="tree_edit" class="form-horizontal" style="display: none">
+    <div class="form-group" style="display: none">
+        <label class="control-label col-xs-3">节点id</label>
+
+        <div class="col-xs-8">
+            <input name="id" type="text" class="form-control" readonly>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3">角色名称</label>
+
+        <div class="col-xs-8">
+            <input name="role_name" type="text" class="form-control">
+        </div>
+    </div>
+</form>
+<script>
+    let options = {
+        add: {
+            before: function ($button, node, tree_obj) {
+                if (node.level != 0) {
+                    tipbox.warning("角色最多只能创建两层,请选中根节点添加！");
+                    return false;
+                }
+                return true;
+            }
+        },
+        edit: {
+            before: function ($button, node, tree_obj) {
+                if (node.level == 0) {
+                    tipbox.warning("根节点不允许被修改！");
+                    return false
+                }
+                return true;
+            }
+        },
+        click: {
+            //添加节点点击自定义参数
+            before: function () {
+                let params = {active_tab: 0};
+                let $li = $("#group_tabs").find("li.active");
+                if ($li.length > 0) {
+                    params.active_tab = $li.index();
+                }
+                return params;
+            }
+        }
+    }
+    initZtree($("#role_tree"), options);
+</script>

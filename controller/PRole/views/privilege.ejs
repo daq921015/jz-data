@@ -1,0 +1,30 @@
+<div id="project_first" class="project" style="height: 100%">
+    <ul class="menu">
+        <li data-url="/PRole/privilege/menu">
+            <span class="title">菜单</span>
+        </li>
+        <li data-url="/PRole/privilege/env">
+            <span class="title">环境</span>
+        </li>
+        <li data-url="/PRole/privilege/program">
+            <span class="title">程序</span>
+        </li>
+    </ul>
+</div>
+<div id="project_main_first" style="overflow: hidden;height: 100%"></div>
+<script>
+    $(function () {
+        let $project_first = $("#project_first");
+        let $project_main_first = $("#project_main_first");
+        $project_first.find(".menu>li").click(function () {
+            $(this).siblings().removeClass("active").end().addClass("active");
+            let url = $(this).data("url");
+            loadPage($project_main_first, url, {});
+        });
+        //默认选中第一个
+        let $menu_first = $project_first.find(".menu>li:eq(0)");
+        if ($menu_first.length > 0) {
+            $menu_first.click();
+        }
+    });
+</script>

@@ -1,0 +1,573 @@
+//------------body样式-------------
+$bodyFondSize: 14px; //全局字体大小
+$mobileWidth: 768px; //手机尺寸分界
+//------------导航栏样式-----------
+$navBarHeight: 50px; //高度
+$navBarBackgroundColor: #373d41; //背景色
+$navBarFontClor: #ffffff; //字体颜色
+$navBarButtonHoverBackgroundColor: #2a2f32; //按钮hover背景色
+$navBarButtonBorderColor: #333; //按钮边框颜色
+//用户弹框
+$userBoxWidth: 280px; //宽度
+$userBoxBackgroundColor: #ECF0F5; //背景色
+$userBoxHeaderBackgroundColor: #00AAEE; //header背景色
+$userBoxyFooterHeight: 40px; //footer高度
+//-------------菜单栏样式-----------------
+$sideBarOpenWeight: 180px; //open状态宽度
+$sideBarMiniWeight: 50px; //mimi状态宽度
+$sideBarMenuButtonHeight: 40px; //菜单按钮高度
+$sidebarFontClor: #ffffff; //菜单栏全局字体颜色
+$sideBarBackgroundColor: #333744; //菜单栏全局背景色
+$sideBarMainMenuBackgroundColor: #42485b; //一级菜单背景色
+$sideBarMainMenuHoverBackgroundColor: #1e282c; //一级菜单hover背景色
+$sideBarSubMenuBackgroundColor: #333744; //二级菜单背景色
+$sideBarSubMenuHoverBackgroundColor: #4a5064; //二级菜单hover背景色
+$sideBarMenuActiveBackgroundColor: #00c1de; //选中菜单背景色
+//------------工作区域样式--------------
+$contentBackgroundColor: #ffffff; //工作区域全局背景色
+$contentSiderBarWidth: 150px; //菜单栏默认宽度
+$contentSiderBarBackgroundColor: #eaedf1; //菜单栏背景色
+$contentSiderBarHeaderBackgroundColor: #d9dee4; //菜单栏头部背景色
+$contentSiderBarHeaderHeight: 50px; //菜单栏头部高度
+$contentSideBarMenuActiveBackgroundColor: #ffffff; //菜单选中背景色
+$contentSideBarMenuHoverBackgroundColor: #f4f6f8; //菜单hover背景色
+$contentSideBarMenuButtonHeight: 40px; //菜单按钮高度
+//主工作区域
+$contentMainHeaderHeight: 42px; //头高度
+//----------relative z轴设置-----------
+$navBarZIndex: 1; //解决工作区域与导航栏重叠(margin-top)
+$bubbleZIndex: 2; //解决菜单提示框与工作区域重叠
+$contentPointerZIndex: 1; //解决隐藏按钮与主工作区域重叠
+
+@mixin transition($property:all,$time:0.3) {
+    transition: #{$property} #{$time}s;
+    -moz-transition: #{$property} #{$time}s;
+    -webkit-transition: #{$property} #{$time}s;
+    -o-transition: #{$property} #{$time}s;
+}
+
+//全局默认样式
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: $bodyFondSize;
+    //修改a标签默认属性
+    a {
+        &:hover {
+            color: #2152A0;
+            text-decoration: none;
+        }
+    }
+    //表格工具栏
+    .lbl-table-tools {
+        background: rgba(255, 255, 255, 1);
+        width: 100%;
+        padding: 5px 0;
+    }
+    //div必填标记,input不支持before
+    .lbl-star:before {
+        content: '*';
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin-right: -7px;
+        margin-top: -2px;
+        color: red;
+        font-size: 22px;
+    }
+    //程序日志pre样式
+    .lbl-log {
+        white-space: pre-wrap; /*css-3*/
+        white-space: -moz-pre-wrap; /*Mozilla,since1999*/
+        white-space: -o-pre-wrap; /*Opera7*/
+        word-wrap: break-word; /*InternetExplorer5.5+*/
+        margin: -3px;
+        padding: 0;
+        width: auto;
+        border: none;
+        background-color: inherit;
+    }
+    //右键菜单(树)
+    .lbl-context-menu {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        list-style: none;
+        overflow: hidden;
+        white-space: nowrap;
+        padding: 2px;
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, .6);
+        width: 150px;
+        border: solid 1px #CCC;
+        background: #F0F0F0;
+        .icon {
+            display: inline-block;
+            text-align: center;
+            width: 25px;
+            border-right: 1px solid #ffffff;
+        }
+        .title {
+            display: inline-block;
+        }
+        > li {
+            padding: 5px 0 5px 2px;
+            &:hover {
+                border-radius: 3px;
+                margin: -1px;
+                border: 1px solid #aecff7;
+                cursor: pointer;
+            }
+        }
+    }
+    //用户设置权限
+    .lbl-user-page {
+        font-size: 18px;
+        padding: 10px 5px;
+        width: 100%;
+        background: rgba(234, 237, 241, 1);
+        margin: 5px 0;
+        border-radius: 2px;
+        > .return {
+            cursor: pointer;
+            color: #00aaee;
+            &:hover {
+                color: rgba(33, 82, 179, 1);
+            }
+        }
+        > .title {
+            font-weight: bold
+        }
+    }
+    //tipbox提示框图标
+    .lbl-icon {
+        &.error,
+        &.info,
+        &.success,
+        &.warning {
+            height: 32px;
+            width: 38px;
+            float: left;
+            margin-right: 5px;
+        }
+        &.error {
+            background: url("/public/img/error.png") no-repeat;
+        }
+        &.info {
+            background: url("/public/img/info.png") no-repeat;
+        }
+        &.success {
+            background: url("/public/img/success.png") no-repeat;
+        }
+        &.warning {
+            background: url("/public/img/warning.png") no-repeat;
+        }
+    }
+    //自动消失提示框样式
+    .lbl-auto-tipbox {
+        position: fixed;
+        top: 0;
+        width: 350px;
+        left: 50%;
+        margin-left: -175px;
+        z-index: 999;
+        padding: 15px 15px 15px 50px;
+        border-radius: 3px;
+        background-position: 15px center;
+        background-repeat: no-repeat;
+        box-shadow: 0 0 12px #999;
+        color: #FFF;
+        opacity: 0.9;
+        cursor: pointer;
+        &:hover {
+            box-shadow: 0 0 12px #000;
+            opacity: 1;
+        }
+        &.ainfo {
+            background-color: #2F96B4;
+            background-image: url("/public/img/ainfo.png") !important;
+        }
+        &.aerror {
+            background-color: #BD362F;
+            background-image: url("/public/img/aerror.png") !important;
+        }
+        &.asuccess {
+            background-color: #51A351;
+            background-image: url("/public/img/asuccess.png") !important;
+        }
+        &.awarning {
+            background-color: #F89406;
+            background-image: url("/public/img/awarning.png") !important;
+        }
+    }
+    //bootstrap 输入组样式更改
+    .lbl-input-group-modal > .input-group-addon {
+        cursor: pointer;
+        color: rgba(255, 255, 255, 1);
+        background: #00aaee;
+    }
+    //---------bootstrap默认值更改---------------
+    .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+        padding-right: 2px;
+        padding-left: 2px;
+    }
+    .row {
+        margin-right: -5px;
+        margin-left: -5px;
+    }
+    //为bootstrap-table选中样色添加行背景色，不再需要success类
+    .table > thead > tr > td.selected,
+    .table > tbody > tr > td.selected,
+    .table > tfoot > tr > td.selected,
+    .table > thead > tr > th.selected,
+    .table > tbody > tr > th.selected,
+    .table > tfoot > tr > th.selected,
+    .table > thead > tr.selected > td,
+    .table > tbody > tr.selected > td,
+    .table > tfoot > tr.selected > td,
+    .table > thead > tr.selected > th,
+    .table > tbody > tr.selected > th,
+    .table > tfoot > tr.selected > th {
+        background-color: #dff0d8;
+    }
+    .table-hover > tbody > tr > td.selected:hover,
+    .table-hover > tbody > tr > th.selected:hover,
+    .table-hover > tbody > tr.selected:hover > td,
+    .table-hover > tbody > tr:hover > .selected,
+    .table-hover > tbody > tr.selected:hover > th {
+        background-color: #d0e9c6;
+    }
+    //调整弹窗表格样式
+    .modal-body {
+        padding: 5px 15px;
+    }
+
+    .modal-body .fixed-table-pagination div.pagination, .fixed-table-pagination .pagination-detail {
+        margin-bottom: 0;
+    }
+
+    .modal-body .pagination {
+        display: inherit;
+    }
+    //-----------------END-----------------------
+    .project {
+        float: left;
+        width: 150px;
+        height: 100%;
+        background: #FFF0F5;
+        padding-top: 8px;
+        overflow-y: auto;
+        > .menu {
+            cursor: pointer;
+            list-style: none;
+            padding: 0;
+            line-height: 40px;
+            .title {
+                padding-left: 20px;
+            }
+            > .active {
+                background: #ffffff;
+            }
+            > :not(.active):hover {
+                background: #f4f6f8;
+            }
+        }
+    }
+}
+
+.lbl-login {
+    text-align: center;
+    padding-top: 100px;
+    height: 100%;
+    &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: url("/public/img/login_bg.jpg");
+        background-size: cover;
+        -webkit-filter: blur(15px);
+        -ms-filter: blur(15px);
+        filter: blur(15px);
+    }
+}
+
+.lbl-sidebar {
+    float: left;
+    height: 100%;
+    background-color: $sideBarBackgroundColor;
+    color: $sidebarFontClor;
+    overflow-y: auto;
+    @include transition("width", 0.3);
+    &.open { //open状态
+        width: $sideBarOpenWeight;
+        > .logo {
+            > .mini {
+                display: none;
+            }
+            > .open {
+                display: block;
+            }
+        }
+    }
+    &.mini { //mini状态
+        width: $sideBarMiniWeight;
+        > .logo {
+            > .mini {
+                display: inline-block;
+            }
+            > .open {
+                display: none;
+            }
+        }
+    }
+    &.off { //关闭状态(close名称会与bootstrap冲突)
+        width: 0;
+        > .logo {
+            > .mini {
+                display: none;
+            }
+        }
+    }
+    > .logo { //logo样式
+        background-color: $navBarBackgroundColor;
+        line-height: $navBarHeight;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+        font-size: $sideBarMenuButtonHeight/2;
+        border-right: 1px solid $navBarButtonBorderColor;
+    }
+    .main-menu {
+        background-color: $sideBarMainMenuBackgroundColor; //一级菜单背景色
+        .father:hover,
+        .child:not(.active):hover {
+            background-color: $sideBarMainMenuHoverBackgroundColor; //一级菜单鼠标悬浮变色
+        }
+    }
+    .sub-menu {
+        background-color: $sideBarSubMenuBackgroundColor; //二级菜单背景色
+        .child:not(.active):hover {
+            background-color: $sideBarSubMenuHoverBackgroundColor; //二级菜单鼠标悬浮变色
+        }
+    }
+    .father, .child {
+        position: relative;
+        height: $sideBarMenuButtonHeight;
+        cursor: pointer;
+        overflow: hidden;
+        white-space: nowrap;
+        line-height: $sideBarMenuButtonHeight;
+        > .icon { //菜单图标样式
+            display: inline-block;
+            text-align: center;
+            width: $sideBarMiniWeight;
+        }
+        > .title {
+            display: inline-block;
+            width: $sideBarOpenWeight - $sideBarMiniWeight;
+        }
+        &.active { //选中菜单背景色
+            background-color: $sideBarMenuActiveBackgroundColor;
+            &:before { //镂空三角
+                content: "";
+                position: absolute;
+                right: 0;
+                top: 50%;
+                margin-top: -$sideBarMenuButtonHeight/6;
+                border: $sideBarMenuButtonHeight/6 solid transparent;
+                border-right-color: rgba(234, 237, 241, 1);
+            }
+        }
+    }
+
+    //菜单栏提示框
+    .bubble {
+        position: fixed;
+        z-index: $bubbleZIndex;
+        color: $sidebarFontClor;
+        height: $sideBarMenuButtonHeight;
+        line-height: $sideBarMenuButtonHeight;
+        border-radius: $sideBarMenuButtonHeight/6;
+        padding: 0 $sideBarMenuButtonHeight/6;
+        background: rgba(85, 99, 112, 1);
+        left: $sideBarMiniWeight+$sideBarMenuButtonHeight/6;
+        &:before { //提示小三角
+            position: absolute;
+            content: "";
+            border: $sideBarMenuButtonHeight/6 solid transparent;
+            margin-top: -$sideBarMenuButtonHeight/6;
+            border-right-color: rgba(85, 99, 112, 1);
+            right: 100%;
+            top: 50%;
+        }
+    }
+}
+
+.lbl-navbar {
+    position: relative;
+    z-index: $navBarZIndex;
+    overflow: hidden;
+    white-space: nowrap;
+    height: $navBarHeight;
+    background-color: $navBarBackgroundColor;
+    color: $navBarFontClor;
+    > .button {
+        margin-left: -1px; //按钮边框线重合问题
+        float: left;
+        cursor: pointer;
+        padding: 0 $navBarHeight/3;
+        height: $navBarHeight;
+        line-height: $navBarHeight;
+        border-left: 1px solid $navBarButtonBorderColor;
+        border-right: 1px solid $navBarButtonBorderColor;
+        &:hover {
+            background-color: $navBarButtonHoverBackgroundColor;
+        }
+    }
+    .user-box {
+        position: fixed;
+        width: $userBoxWidth;
+        background: $userBoxBackgroundColor;
+        text-align: center;
+        > .header {
+            background: $userBoxHeaderBackgroundColor;
+            padding: $userBoxWidth/14;
+            > .title {
+                margin-top: $userBoxWidth/28;
+            }
+        }
+        > .footer {
+            line-height: $userBoxyFooterHeight;
+            width: 100%;
+        }
+    }
+    .user-img {
+        display: inline-block;
+        background: url("/public/img/user_img.jpg");
+        background-size: cover;
+        border-radius: 50%;
+        vertical-align: middle;
+        &.small {
+            width: 25px;
+            height: 25px;
+        }
+        &.large {
+            width: 100px;
+            height: 100px;
+        }
+    }
+}
+
+.lbl-content {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    margin-top: -$navBarHeight;
+    padding-top: $navBarHeight;
+    background-color: $contentBackgroundColor;
+    > .sidebar {
+        position: relative;
+        z-index: $contentPointerZIndex;
+        float: left;
+        background-color: $contentSiderBarBackgroundColor;
+        white-space: nowrap;
+        height: 100%;
+        @include transition("width", 0.3);
+        &.open { //菜单栏打开状态
+            width: $contentSiderBarWidth;
+            > .pointer {
+                right: 0;
+                text-align: right;
+                &:before {
+                    content: "\e128";
+                }
+            }
+        }
+        &.off { //关闭状态(close名称会与bootstrap冲突)
+            width: 0;
+            > .pointer {
+                left: 100%;
+                text-align: left;
+                &:before {
+                    content: "\e127";
+                }
+            }
+        }
+        > .header {
+            overflow: hidden;
+            height: $contentSiderBarHeaderHeight;
+            background: $contentSiderBarHeaderBackgroundColor;
+            > .title {
+                line-height: $contentSiderBarHeaderHeight;
+                margin-left: $contentSiderBarHeaderHeight/3;
+                font-weight: bolder;
+                font-size: $contentSiderBarHeaderHeight/2.5;
+                font-family: 楷体;
+            }
+        }
+        > .body-box {
+            overflow: hidden;
+            height: 100%;
+            margin-top: -$contentSiderBarHeaderHeight;
+            padding-top: $contentSiderBarHeaderHeight;
+            > .body {
+                overflow-y: auto;
+                height: 100%;
+                > .menu {
+                    cursor: pointer;
+                    list-style: none;
+                    padding: 0;
+                    line-height: $contentSideBarMenuButtonHeight;
+                    .title {
+                        padding-left: $contentSideBarMenuButtonHeight/1.3;
+                    }
+                    > .active {
+                        background: $contentSideBarMenuActiveBackgroundColor;
+                    }
+                    > :not(.active):hover {
+                        background: $contentSideBarMenuHoverBackgroundColor;
+                    }
+                }
+            }
+        }
+        > .pointer { //隐藏菜单栏
+            position: absolute;
+            width: $contentSideBarMenuButtonHeight/2;
+            height: $contentSideBarMenuButtonHeight;
+            margin-top: -$contentSideBarMenuButtonHeight/2;
+            line-height: $contentSideBarMenuButtonHeight;
+            background: transparent;
+            cursor: pointer;
+            top: 50%;
+            font-family: 'Glyphicons Halflings';
+            opacity: 0.8;
+            &:hover {
+                color: blue;
+                opacity: 1;
+            }
+        }
+    }
+    > .main {
+        overflow: auto;
+        height: 100%;
+        > .header {
+            overflow: hidden;
+            height: $contentMainHeaderHeight;
+        }
+        > .body-box {
+            overflow: hidden;
+            height: 100%;
+            margin-top: -$contentMainHeaderHeight;
+            padding-top: $contentMainHeaderHeight;
+            > .body {
+                overflow: auto;
+                height: 100%;
+            }
+        }
+    }
+}
+
+

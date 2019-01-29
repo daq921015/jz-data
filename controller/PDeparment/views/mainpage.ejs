@@ -1,0 +1,36 @@
+<ul id="group_tabs" class="nav nav-tabs">
+    <li class="<%= treeNode['active_tab'] == 0 ? 'active' : '' %>" data-url="/PDeparment/employee">
+        <a href="#div_tab_content" data-toggle="tab">包含员工</a>
+    </li>
+    <li class="<%= treeNode['active_tab'] == 1 ? 'active' : '' %>" data-url="/PDeparment/role">
+        <a href="#div_tab_content" data-toggle="tab"> 所属角色 </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div class="tab-pane active" id="div_tab_content"></div>
+</div>
+<div id="treeNode" style="display: none">
+    <% for(let key in treeNode){ %>
+    <input name="<%= key %>" value="<%= treeNode[key] %>">
+    <% } %>
+</div>
+<script>
+    $(function () {
+        let $group_tabs = $("#group_tabs");
+        let init_url = $group_tabs.find("li.active").data("url");
+        let init_tab = $group_tabs.find("li.active a").attr("href");
+        $(init_tab).load(init_url);
+        $group_tabs.find("li").click(function () {
+            let $li = $(this);
+            let url = $li.data("url");
+            let tab = $li.find("a").attr("href");
+            $(tab).load(url);
+            if ($(window).width() < 768) {
+                setTimeout(function () {
+                    fixTable()
+                }, 0);
+            }
+        });
+    });
+</script>
+

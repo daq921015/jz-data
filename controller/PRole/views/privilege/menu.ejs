@@ -1,0 +1,90 @@
+<div style="padding: 10px;background-color: #D3D3D3;">
+    <button id="btn_menu_edit" type="button" class="btn btn-default">修改</button>
+    <button id="btn_menu_concel" type="button" style="display: none" class="btn btn-default">取消</button>
+    <button id="btn_menu_save" type="button" style="display: none" class="btn btn-primary">保存</button>
+</div>
+<div style="overflow: auto;background-color:#FFFFFF">
+    <ul id="menu_tree" data-url="/PRole/privilege/menu/list" class="ztree"></ul>
+</div>
+
+<script>
+    let $menu_tree = $("#menu_tree");
+    let $treeNode = $("#treeNode");//选中树节点 内容
+    let $btn_menu_edit = $("#btn_menu_edit");//修改节点
+    let $btn_menu_save = $("#btn_menu_save");//修改节点
+    let $btn_menu_concel = $("#btn_menu_concel");//修改节点
+    let node_level = $treeNode.find("input[name='level']").val();
+    let node_id = $treeNode.find("input[name='id']").val();
+    let node_ids = $treeNode.find("input[name='node_ids']").val();
+    //设置树高度
+    $menu_tree.height($(window).height() - $menu_tree.offset().top - 20)
+    let options = {
+        setting: {},
+        otherParam: {
+            node_level: node_level,
+            node_id: node_id,
+            node_ids: node_ids
+        }
+    };
+    options.setting.check = {
+        enable: true,
+        chkboxType: {"Y": "ps", "N": "ps"}
+    };
+    let treeObj = initZtree($menu_tree, options);
+    //设置tree编辑状态 true可编辑，false不可编辑
+    let setTreeEdit = function (is_edit) {
+        if (is_edit) {
+            $menu_tree.parent().css("background", "#F0FFF0");
+            $btn_menu_edit.hide();
+            $btn_menu_save.show();
+            $btn_menu_concel.show();
+        } else {
+            $menu_tree.parent().css("background", "#FFFFFF");
+            $btn_menu_edit.show();
+            $btn_menu_save.hide();
+            $btn_menu_concel.hide();
+        }
+        let nodes = treeObj.getNodes();
+        for (let i = 0, j = nodes.length; i < j; i++) {
+            treeObj.setChkDisabled(nodes[i], !is_edit, true, true);
+        }
+    }
+    //切换修改状态
+    $btn_menu_edit.click(function () {
+        setTreeEdit(true);
+    });
+    $btn_menu_concel.click(function () {
+        setTreeEdit(false);
+        treeObj.reAsyncChildNodes(null, "refresh");
+    });
+    //保存当前选中节点
+    $btn_menu_save.click(function () {
+        let all_node = treeObj.getNodes();
+        if (all_node.length === 0) {
+            tipbox.warning("没有获取到树节点。");
+            return false;
+        }
+        if (all_node[0].chkDisabled) {
+            tipbox.warning("当前权限树不是修改状态，请先点击修改。");
+            return false;
+        }
+        let nodes = treeObj.getCheckedNodes(true);
+        let check_ids = [];
+        nodes.forEach(function (item) {
+            check_ids.push(item["id"]);
+        });
+        $.ajaxForm({
+            url: "/PRole/privilege/menu/save",
+            method: "post",
+            btn: $btn_menu_save,
+            data: {
+                role_id: node_id,
+                check_ids: JSON.stringify(check_ids)
+            },
+            success: function (data) {
+                tipbox.info(data);
+                setTreeEdit(false);
+            }
+        });
+    });
+</script>

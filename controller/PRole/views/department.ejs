@@ -1,0 +1,128 @@
+<div class="container-fluid">
+    <div id="department_tools" class="lbl-table-tools">
+        <div class="form-inline" role="form">
+            <div class="form-group">
+                <button id="role_add_department" class="btn btn-default displayTable"
+                        data-url="/PRole/department/add" title="角色添加部门">
+                    <i class="glyphicon glyphicon-plus"></i>增添部门
+                </button>
+                <button class="btn btn-default del" data-url="/PRole/department/del"
+                        title="角色移出部门">
+                    <i class="glyphicon glyphicon-minus"></i>移出部门
+                </button>
+                <button class="btn btn-default btn-sm hidden-md hidden-lg toggle">
+                    <i class="glyphicon glyphicon-list-alt icon-list-alt"></i>
+                </button>
+            </div>
+            <form style="display: inline-block">
+                <div class="form-group">
+                    <input style="display: none">
+                    <input name="search" class="form-control" type="text" placeholder="名称">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary search" type="button">查询</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <table id="department_table" data-tools="#department_tools"></table>
+</div>
+<div id="add_department_tools" style="display: none">
+    <div id="modal_department_tools" class="lbl-table-tools">
+        <form class="form-inline" role="form" style="display: inline-block">
+            <div class="form-group">
+                <input style="display: none">
+                <input name="search" class="form-control" type="text" placeholder="名称" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary search" type="button">查询</button>
+            </div>
+        </form>
+    </div>
+    <table data-tools="#modal_department_tools"></table>
+</div>
+<script>
+    $(function () {
+        //------------获取元素-------------------
+        let $department_table = $("#department_table");//员工table
+        let $treeNode = $("#treeNode");//选中树节点 内容
+        let $add_department_tools = $("#add_department_tools");
+        let $role_add_department = $("#role_add_department");//添加员工按钮
+        //---------------END--------------------
+        let options = {};
+        let node_level = $treeNode.find("input[name='level']").val();
+        let node_id = $treeNode.find("input[name='id']").val();
+        let node_ids = $treeNode.find("input[name='node_ids']").val();
+        options.url = "/PRole/department/list";
+        options.queryParams = function (params) {
+            let form_array = $("#department_tools").find("form").serializeForm();
+            return $.extend({
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                sortName: params.sortName,
+                sortOrder: params.sortOrder,
+                node_id: node_id,
+                node_ids: node_ids
+            }, form_array || {});
+        };
+        options.columns = [{
+            checkbox: true
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'department_name',
+            title: '部门名称'
+        }]
+        initTable($department_table, options);
+        //------弹出框表初始化参数-----------------
+        let $modal_form = $add_department_tools.find("form");
+        let modal_table_options = {};
+        modal_table_options.url = "/PRole/department/addlist";
+        modal_table_options.queryParams = function (params) {
+            let form_array = $modal_form.serializeForm();
+            return $.extend({
+                limit: params.limit,   //页面大小
+                offset: params.offset,  //页码
+                sortName: params.sortName,
+                sortOrder: params.sortOrder,
+                node_id: node_id,
+                node_ids: node_id
+            }, form_array || {});
+        };
+        modal_table_options.columns = [{
+            checkbox: true
+        }, {
+            halign: "left",
+            align: "left",
+            valign: "middle",
+            sortable: false,
+            field: 'department_name',
+            title: '部门名称'
+        }];
+        $role_add_department.click(function () {
+            if (node_level == 0) {
+                tipbox.warning("根节点不能添加部门")
+                return false;
+            }
+            initModalTable($add_department_tools, modal_table_options, function (rows) {
+                if (_.isEmpty(rows)) {
+                    tipbox.error("添加失败：前端")
+                    return false;
+                }
+                let ids = _.pluck(rows, "id");
+                let url = $role_add_department.data("url");
+                $.ajaxForm({
+                    url: url,
+                    method: "post",
+                    data: {"id": ids, "node_id": node_id},
+                    success: function (data) {
+                        tipbox.ainfo(data);
+                        $department_table.bootstrapTable("refresh");
+                    }
+                });
+            })
+        });
+    });
+</script>

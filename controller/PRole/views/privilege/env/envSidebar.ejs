@@ -1,0 +1,26 @@
+<div id="project_second" class="project" style="height: 100%;background-color: #FFF7FF">
+    <ul class="menu">
+        <% for(let i = 0, j = envs.length;i < j;i++){ %>
+        <li data-url="/PRole/privilege/env/sidebar/<%= envs[i]["env_id"] %>">
+            <span class="title"><%= envs[i]["env_name"] %></span>
+        </li>
+        <% } %>
+    </ul>
+</div>
+<div id="project_main_second" style="overflow: hidden;height: 100%"></div>
+<script>
+    $(function () {
+        let $project_second = $("#project_second");
+        let $project_main_second = $("#project_main_second");
+        $project_second.find(".menu>li").click(function () {
+            $(this).siblings().removeClass("active").end().addClass("active");
+            let url = $(this).data("url");
+            loadPage($project_main_second, url, {});
+        });
+        //默认选中第一个
+        let $menu_second = $project_second.find(".menu>li:eq(0)");
+        if ($menu_second.length > 0) {
+            $menu_second.click();
+        }
+    });
+</script>
