@@ -9,6 +9,7 @@ let moment = devops.moment;
 
 class JzApiService {
     constructor() {
+        //构造函数
     }
     //会员储值与销售金额
     vipStoreAndConsumeByDay(tenant_id, days, today) {
