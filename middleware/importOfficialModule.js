@@ -7,6 +7,7 @@ module.exports = function () {
     devops.fs = require('fs');
     devops.cookieParser = require('cookie-parser');
     devops.crypto = require("crypto");//签名模块
+    devops.CryptoJS = require("crypto-js");//签名模块，第二种
     devops.https = require("https");//https请求
     devops.ejs = require("ejs");//ejs
     devops.querystring = require("querystring");//请求参数序列化和反序列化模块

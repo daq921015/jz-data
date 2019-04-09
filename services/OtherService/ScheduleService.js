@@ -43,7 +43,7 @@ let Za1JzDate = function () {
     });
 };
 module.exports = function (devops) {
-    let a = schedule.scheduleJob('1 */30 * * * *', function () {
-        Za1JzDate();
-    });
+    // let a = schedule.scheduleJob('1 */30 * * * *', function () {
+    //     Za1JzDate();
+    // });
 };

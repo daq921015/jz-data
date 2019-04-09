@@ -6,7 +6,7 @@ module.exports = app => {
         if (_.has(req.form_fields, "isJson") && req.form_fields["isJson"]) {
             res.send({"status": "error", "msg": "请求页面未找到:" + req.url, "data": ""});
         } else {
-            res.status(404);
+            res.status(200);
             res.render("4xx");
         }
     });
@@ -30,7 +30,7 @@ module.exports = app => {
                     res.send({"status": "error", "msg": "" + err_msg, "data": ""});
                 }
             } else {
-                res.status(500);
+                res.status(200);
                 res.locals.err_msg = err_msg;
                 // res.locals.error = req.app.get('env') === 'development' ? err : {};
                 // render the error page

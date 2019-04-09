@@ -6,6 +6,7 @@ let devopsdb = devops.Sequelize.schema.devopsdb;
 let logError = devops.publicmethod.logError;
 let Sequelize = devops.Sequelize;
 let models = devopsdb.models;
+
 class PrivilegeService {
     constructor() {
     }

@@ -9,9 +9,7 @@ module.exports = function (sequelize, DataTypes) {
     this.attributes = {
         id: {type: DataTypes.BIGINT(20).UNSIGNED, autoIncrement: true, primaryKey: true},
         login_name: {
-            type: DataTypes.STRING(32), allowNull: false, validate: {
-                isAlpha: {msg: "登录名不符合规则，只能为字母"}
-            }
+            type: DataTypes.STRING(32), allowNull: false
         },
         login_pwd: {
             type: DataTypes.STRING(32), allowNull: false, validate: {
@@ -36,6 +34,8 @@ module.exports = function (sequelize, DataTypes) {
         login_count: {type: DataTypes.BIGINT(20).UNSIGNED, allowNull: false, defaultValue: 0},
         department_id: {type: DataTypes.BIGINT(20).UNSIGNED, allowNull: false, defaultValue: 0},
         emp_type: {type: DataTypes.TINYINT.UNSIGNED, allowNull: false, defaultValue: 2},
+        is_product: {type: DataTypes.TINYINT.UNSIGNED, allowNull: false, defaultValue: 0},
+        tenant_id: {type: DataTypes.BIGINT.UNSIGNED},
         memo: {
             type: DataTypes.STRING(50),
             allowNull: true,

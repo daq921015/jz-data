@@ -28,7 +28,6 @@ module.exports = function (app) {
                     let controller_name = controller["controller_name"];
                     //设置子路由模板与引擎
                     let sub_app = controller["app"];
-                    let before = controller["before"];//子路由执行前
                     let engine = controller["engine"] || "ejs";
                     sub_app.set('views', path.join(dir_root, 'views'));
                     sub_app.set('view engine', engine);
