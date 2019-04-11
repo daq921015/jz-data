@@ -130,6 +130,7 @@ module.exports = function (options, schema_prefix) {
     //------------------------------------END------------------------------------------------------
     //---------------------------------设置表间关系------------------------------------------------
     models.Tenant.hasOne(models.SUser, {foreignKey: "tenant_id"});
+    models.SUser.belongsTo(models.Tenant, {foreignKey: "tenant_id"});
     models.TenantGoods.belongsTo(models.Goods, {foreignKey: "goods_id"});
     models.OrderInfo.hasOne(models.OrderList, {foreignKey: "order_id"});
     //-------------------------------------END-----------------------------------------------------

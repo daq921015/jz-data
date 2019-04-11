@@ -13,6 +13,10 @@ ElasticsearchUtils.getClient = function () {
     //连接池待做   client:时间  120s没有使用的close,初始化10个,最多200个
     return client;
 };
+ElasticsearchUtils.search = function (param) {
+    let that = this;
+    return that.getClient().search(param);
+};
 ElasticsearchUtils.search_hits = function (param) {
     let that = this;
     return that.getClient().search(param).then(data => {

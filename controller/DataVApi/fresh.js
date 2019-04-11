@@ -9,69 +9,100 @@ let logError = devops.publicmethod.logError;
 let Sequelize = devops.Sequelize;
 let models = devopsdb.models;
 let moment = devops.moment;
-let ElasticSearchUtils = devops.ElasticsearchUtils;
-// 今日销售额
+let freshService = new devops.FreshService();
+
 let before = function (req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.setHeader("Access-Control-Allow-Credentials", true);
     next(req.session.user.is_product ? "" : "非生产环境用户，不具有此模块功能");
 };
+// 今日销售额
 app.get("/today/saleAmount", function (req, res, next) {
-    ElasticSearchUtils.search_aggs({
-        index: 'sale_za1',
-        body: {
-            "query": {
-                "bool": {
-                    "must": [{
-                        "term": {
-                            "tenant_id": req.session.user.tenant_id
-                        }
-                    }, {
-                        "range": {
-                            "create_at": {
-                                "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                "format": "yyyy-MM-dd HH:mm:ss"
-                            }
-                        }
-                    }]
-                }
-            },
-            "aggs": {
-                "sale_amount": {
-                    "sum": {
-                        "field": "total_amount"
-                    }
-                }
-            },
-            "size": 0
-        }
-    }).then(data => {
-        res.send([{
-            name: "",
-            value: data["sale_amount"]["value"].toFixed(0)
-        }]);
+    freshService.todaySaleAmount(req).then(data => {
+        res.send(data);
     }).catch(err => {
         next(err);
     });
 });
 // 今日销售笔数
-app.get("/today/saleCount", async function (req, res, next) {
-    // devops.JzApiService.vipStoreAndConsumeByDay(form_fields["tenant_id"], days, form_fields["today"]).then(data => {
-    //     console.log(req.cookies);
-    //     console.log(req.headers.origin);
-    //     console.log(req.session.user);
-    //     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
-    //     res.setHeader("Access-Control-Allow-Credentials", true);
-    //     console.log(data);
-    //     res.send(data);
-    // }).catch(err => {
-    //     next(err);
-    // });
+app.get("/today/saleCount", function (req, res, next) {
+    freshService.todaySaleCount(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
 });
 // 今日平均客单价
-app.get("/today/saleAmountPer", async function (req, res, next) {
+app.get("/today/saleAmountPer", function (req, res, next) {
+    freshService.todaySaleAmountPer(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
 });
-
+app.get("/yestoday/saleAmount", function (req, res, next) {
+    freshService.yestodaySaleAmount(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/yestoday/saleCount", function (req, res, next) {
+    freshService.yestodaySaleCount(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/yestoday/saleAmountPer", function (req, res, next) {
+    freshService.yestodaySaleAmountPer(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/today/branchTop", function (req, res, next) {
+    freshService.todayBranchTop(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/today/goodsTop", function (req, res, next) {
+    freshService.todayGoodsTop(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/today/paymentAmount", function (req, res, next) {
+    freshService.todayPaymentAmount(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/nearday/saleAmount", function (req, res, next) {
+    freshService.nearDaysSaleAmount(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/today/hourSaleAmount", function (req, res, next) {
+    freshService.todayHourSaleAmount(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
+app.get("/today/categoryTop", function (req, res, next) {
+    freshService.todayCategoryTop(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
 
 exports.app = app;
 exports.before = before;

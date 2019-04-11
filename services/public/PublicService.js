@@ -17,8 +17,19 @@ class PublicService {
             if (!/\d/.test(form_fields["login_name"])) {
                 return Promise.reject("只有纯数字的管理员账号可以登陆，其它员工禁止登陆");
             }
-            return Sequelize.getBusinessTableModel(1, "z0", "s_user").then(model => {
-                return model.findOne({
+            return Promise.all([
+                Sequelize.getBusinessTableModel(1, "z0", "s_user"),
+                Sequelize.getBusinessTableModel(1, "z0", "tenant"),
+            ]).then(models => {
+                let SUser = models[0];
+                let Tenant = models[1];
+                return SUser.findOne({
+                    include: {
+                        model: Tenant,
+                        where: {
+                            is_deleted: 0
+                        }
+                    },
                     where: {
                         is_deleted: 0,
                         login_name: form_fields["login_name"],
@@ -39,9 +50,11 @@ class PublicService {
                         return models.PUser.create({
                             login_name: online_user.get("login_name"),
                             login_pwd: "nopasswd",
-                            user_name: online_user.get("login_name"),
+                            user_name: online_user.get("Tenant").get("tenant_name"),
                             is_product: 1,
-                            tenant_id: online_user.get("tenant_id")
+                            tenant_id: online_user.get("tenant_id"),
+                            tenant_name: online_user.get("Tenant").get("tenant_name"),
+                            partition_code: online_user.get("Tenant").get("partition_code")
                         }).then(create_user => {
                             c_user = create_user;
                             // 设置线上用户默认权限
@@ -80,7 +93,6 @@ class PublicService {
             user["user_id"] = user["id"];
             req.session.user = user;
             req.session.islogin = true;
-            console.log(req.session.user.tenant_id);
             return Promise.resolve(user);
         })
     }

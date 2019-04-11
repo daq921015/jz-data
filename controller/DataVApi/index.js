@@ -17,12 +17,8 @@ app.get("/vipStoreAndConsumeByDay", async function (req, res, next) {
         days = form_fields["days"];
     }
     devops.JzApiService.vipStoreAndConsumeByDay(form_fields["tenant_id"], days, form_fields["today"]).then(data => {
-        console.log(req.cookies);
-        console.log(req.headers.origin);
-        console.log(req.session.user);
         res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
         res.setHeader("Access-Control-Allow-Credentials", true);
-        console.log(data);
         res.send(data);
     }).catch(err => {
         next(err);

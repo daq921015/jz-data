@@ -15,6 +15,8 @@ module.exports = function () {
     devops.publicmethod = require("../customUtils/publicmethod");
     //elasticsearch工具
     devops.ElasticsearchUtils = require("../customUtils/ElasticsearchUtils");
+    //业务库工具
+    devops.BusinessUtils = require("../customUtils/BusinessUtils");
     //加载underscore扩展方法,自定义其它扩展方法
     require("./expandUnderscore")();
     //初始化本程序运行依赖数据库(以及其它数据库)

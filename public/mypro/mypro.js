@@ -41,7 +41,7 @@ let initSiderBar = function (global_options) {
         $(this).addClass("active");
         let url = $(this).data("url");
         let privilege_id = $(this).data("privilegeId");
-        $("title").html($(this).text() || "运维管理系统");
+        $("title").html($(this).text() || "报表管理系统");
         loadPage(".lbl-content", url, {privilege_id: privilege_id});
     });
     //菜单栏，mini/open/off显示状态切换

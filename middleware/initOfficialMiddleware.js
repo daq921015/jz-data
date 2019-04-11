@@ -15,6 +15,9 @@ module.exports = app => {
     app.use("/public", devops.express.static(devops.path.join(__dirname, "..", 'public')));
     app.use("/tarticleimg", devops.express.static(devops.path.join(__dirname, "..", 'tarticleimg')));
     app.use("/upload", devops.express.static(devops.path.join(__dirname, "..", 'upload')));
+    app.use("/ping/ping.js", function (req, res) {//阿里云ping检测
+        res.send("ok")
+    });
     // session设置，一个浏览器只能登录一个用户，登录多个待研究。
     app.use(devops.session({
         name: "sid",
