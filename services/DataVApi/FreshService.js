@@ -443,11 +443,19 @@ class FreshService {
             body: {
                 "size": 0,
                 "query": {
-                    "range": {
-                        "create_at": {
-                            "gte": moment().subtract(form_fields["days"], "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                            "format": "yyyy-MM-dd HH:mm:ss"
-                        }
+                    "bool": {
+                        "must": [
+                            {"term": {"tenant_id": req.session.user.tenant_id}},
+                            {"term": {"is_deleted": false}},
+                            {
+                                "range": {
+                                    "create_at": {
+                                        "gte": moment().subtract(form_fields["days"], "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                                        "format": "yyyy-MM-dd HH:mm:ss"
+                                    }
+                                }
+                            }
+                        ]
                     }
                 },
                 "aggs": {
@@ -490,11 +498,19 @@ class FreshService {
             body: {
                 "size": 0,
                 "query": {
-                    "range": {
-                        "create_at": {
-                            "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                            "format": "yyyy-MM-dd HH:mm:ss"
-                        }
+                    "bool": {
+                        "must": [
+                            {"term": {"tenant_id": req.session.user.tenant_id}},
+                            {"term": {"is_deleted": false}},
+                            {
+                                "range": {
+                                    "create_at": {
+                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                                        "format": "yyyy-MM-dd HH:mm:ss"
+                                    }
+                                }
+                            }
+                        ]
                     }
                 },
                 "aggs": {
