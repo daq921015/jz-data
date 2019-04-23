@@ -1,9 +1,9 @@
-let logger = devops.logger;
 let myssh = devops.myssh;
-let node_xlsx = devops.node_xlsx;
 let _ = devops.underscore._;
 let myconfig = devops.myconfig;
 let elasticsearch = devops.elasticsearch;
+let Sequelize = devops.Sequelize;
+let logger = devops.log4js.logger("transfer");
 let ElasticsearchUtils = {};
 ElasticsearchUtils.getClient = function () {
     let elasticsearch = require('elasticsearch');
@@ -38,5 +38,50 @@ ElasticsearchUtils.search_aggs = function (param) {
 ElasticsearchUtils.count = function (param) {
     let that = this;
     return that.getClient().count(param);
+};
+ElasticsearchUtils.bulk = function (data, index_name) {
+    let that = this;
+    let _body = [];
+    data.forEach(function (item) {
+        _body.push({index: {_id: item["id"]}});
+        _body.push(item);
+    });
+    return that.getClient().bulk({
+        index: index_name, type: "_doc", wait_for_active_shards: "1", timeout: "20s",
+        body: _body
+    });
+};
+ElasticsearchUtils.mysqlToElasticsearch = function (partitionCode, tableName, offsetId, limit) {
+    if (!/\d+/.test(offsetId) || !/\d+/.test(limit)) {
+        return Promise.reject("mysqlToElasticsearch转换参数错误");
+    }
+    let that = this;
+    let index_name = partitionCode + "_" + tableName;
+    let last_id = null;
+    let dataSql = "select * from " + tableName + " where id >= " + offsetId + " order by id asc" + " limit " + limit;
+    let startTimeStamp = Date.now();
+    let sqlTime, esTime;
+    logger.info("开始转换数据Mysql=>elasticsearch: 分区=" + partitionCode + ",表名=" + tableName + ",当前主键id开始值=" + offsetId + ",分页大小=" + limit, "转换执行sql:" + dataSql);
+    logger.info("转换执行sql:" + dataSql);
+    return Sequelize.getBusinessSchema(1, partitionCode).then(schema => {
+        return schema.query(dataSql, {
+            type: Sequelize.QueryTypes.SELECT,
+            // replacements: dataOptions,
+            raw: true
+        })
+    }).then(data => {
+        sqlTime = Date.now() - startTimeStamp;
+        if (data.length == 0) {
+            return Promise.reject("elasticsearch批量插入数据为空")
+        }
+        last_id = data[data.length - 1]["id"];
+        return that.bulk(data, index_name).then(data => {
+            return Promise.resolve(data);
+        });
+    }).then(data => {
+        esTime = Date.now() - startTimeStamp - sqlTime;
+        logger.info("本次数据转换完成,总耗时:" + (Date.now() - startTimeStamp) + "ms" + ",sql耗时:" + sqlTime + "ms,ES耗时:" + esTime + "ms");
+        return Promise.resolve(last_id);
+    });
 };
 module.exports = ElasticsearchUtils;

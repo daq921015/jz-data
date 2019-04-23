@@ -6,6 +6,7 @@ let _ = devops.underscore._;
 let devopsdb = devops.Sequelize.schema.devopsdb;
 let logError = devops.publicmethod.logError;
 let Sequelize = devops.Sequelize;
+let ElasticsearchUtils = devops.ElasticsearchUtils;
 let models = devopsdb.models;
 let moment = devops.moment;
 app.get("/vipStoreAndConsumeByDay", async function (req, res, next) {
@@ -42,7 +43,32 @@ app.get("/generateDate", async function (req, res, next) {
     }
     res.send("over");
 });
-
+app.get("/test", async function (req, res, next) {
+    let form_fields = req.form_fields;
+    // http://192.168.51.55/DataVApi/test?maxId=1000000&limit=5000&lastId=0&tableName=goods&partitionCode=za1
+    if (!/\d+/.test(form_fields["lastId"]) || !/\d+/.test(form_fields["maxId"]) || !/\d+/.test(form_fields["limit"]) || !_.has(form_fields, "partitionCode") || !_.has(form_fields, "tableName")) {
+        res.send("参数异常");
+    } else {
+        res.send("已添加完成");
+        let lastId = form_fields["lastId"];
+        let maxId = form_fields["maxId"];
+        let limit = form_fields["limit"];
+        let partitionCode = form_fields["partitionCode"];
+        let tableName = form_fields["tableName"];
+        while (true) {
+            try {
+                lastId = await ElasticsearchUtils.mysqlToElasticsearch(partitionCode, tableName, lastId + 1, limit);
+            } catch (err) {
+                console.log(err);
+                break;
+            }
+            if (lastId > maxId) {
+                console.log("转换完成，最后id:" + lastId);
+                break;
+            }
+        }
+    }
+});
 
 
 exports.app = app;

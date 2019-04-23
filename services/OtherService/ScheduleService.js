@@ -9,6 +9,7 @@ let Sequelize = devops.Sequelize;
 let schedule = devops.schedule;
 let models = devopsdb.models;
 let moment = devops.moment;
+let ElasticsearchUtils = devops.ElasticsearchUtils;
 let Za1JzDate = function () {
     /*
     * 按天结转za1区
