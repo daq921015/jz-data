@@ -42,14 +42,32 @@ ElasticsearchUtils.count = function (param) {
 ElasticsearchUtils.bulk = function (data, index_name) {
     let that = this;
     let _body = [];
+    let sTime = Date.now();
     data.forEach(function (item) {
         _body.push({index: {_id: item["id"]}});
         _body.push(item);
     });
-    return that.getClient().bulk({
-        index: index_name, type: "_doc", wait_for_active_shards: "1", timeout: "20s",
-        body: _body
+    let dateTime = Date.now() - sTime;
+    logger.info("处理数据耗时:" + dateTime + "ms");
+    return Promise.resolve("ok");
+    // return that.getClient().bulk({
+    //     index: index_name, type: "_doc", wait_for_active_shards: "1", timeout: "20s",
+    //     body: _body
+    // });
+};
+ElasticsearchUtils.bulkToJsonFile = function (data, index_name) {
+    let that = this;
+    let _body = "";
+    let sTime = Date.now();
+
+    data.forEach(function (item) {
+        _body = _body + '{"_index":"' + index_name + '","_type":"_doc","_id":"' + item["id"] + '","_score":1,"_source":'
+            + JSON.stringify(item) + "}\r\n";
     });
+    devops.fs.appendFileSync(devops.path.join(devops.root_dir, "upload", "test.json"), _body);
+    let dateTime = Date.now() - sTime;
+    logger.info("处理数据耗时:" + dateTime + "ms");
+    return Promise.resolve("ok")
 };
 ElasticsearchUtils.mysqlToElasticsearch = function (partitionCode, tableName, offsetId, limit) {
     if (!/\d+/.test(offsetId) || !/\d+/.test(limit)) {
@@ -61,7 +79,7 @@ ElasticsearchUtils.mysqlToElasticsearch = function (partitionCode, tableName, of
     let dataSql = "select * from " + tableName + " where id >= " + offsetId + " order by id asc" + " limit " + limit;
     let startTimeStamp = Date.now();
     let sqlTime, esTime;
-    logger.info("开始转换数据Mysql=>elasticsearch: 分区=" + partitionCode + ",表名=" + tableName + ",当前主键id开始值=" + offsetId + ",分页大小=" + limit, "转换执行sql:" + dataSql);
+    logger.info("开始转换数据Mysql=>elasticsearch: 分区=" + partitionCode + ",表名=" + tableName + ",当前主键id开始值=" + offsetId + ",分页大小=" + limit);
     logger.info("转换执行sql:" + dataSql);
     return Sequelize.getBusinessSchema(1, partitionCode).then(schema => {
         return schema.query(dataSql, {
