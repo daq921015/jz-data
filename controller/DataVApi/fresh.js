@@ -62,19 +62,30 @@ app.get("/yestoday/saleAmountPer", function (req, res, next) {
     });
 });
 app.get("/today/branchTop", function (req, res, next) {
-    freshService.todayBranchTop(req).then(data => {
-        res.send(data);
-    }).catch(err => {
-        next(err);
-    });
+    let form_fields = req.form_fields;
+    if (_.has(form_fields, "displayCount") && !/^\d+$/.test(form_fields["displayCount"])) {
+        next("displayCount参数不正确displayCount=\\d+")
+    } else {
+        freshService.todayBranchTop(req).then(data => {
+            res.send(data);
+        }).catch(err => {
+            next(err);
+        });
+    }
 });
 app.get("/today/goodsTop", function (req, res, next) {
-    freshService.todayGoodsTop(req).then(data => {
-        res.send(data);
-    }).catch(err => {
-        next(err);
-    });
+    let form_fields = req.form_fields;
+    if (_.has(form_fields, "displayCount") && !/^\d+$/.test(form_fields["displayCount"])) {
+        next("displayCount参数不正确displayCount=\\d+")
+    } else {
+        freshService.todayGoodsTop(req).then(data => {
+            res.send(data);
+        }).catch(err => {
+            next(err);
+        });
+    }
 });
+//今日收款方式占比
 app.get("/today/paymentAmount", function (req, res, next) {
     freshService.todayPaymentAmount(req).then(data => {
         res.send(data);
@@ -83,11 +94,16 @@ app.get("/today/paymentAmount", function (req, res, next) {
     });
 });
 app.get("/nearday/saleAmount", function (req, res, next) {
-    freshService.nearDaysSaleAmount(req).then(data => {
-        res.send(data);
-    }).catch(err => {
-        next(err);
-    });
+    let form_fields = req.form_fields;
+    if (_.has(form_fields, "displayCount") && !/^\d+$/.test(form_fields["displayCount"])) {
+        next("displayCount参数不正确displayCount=\\d+")
+    } else {
+        freshService.nearDaysSaleAmount(req).then(data => {
+            res.send(data);
+        }).catch(err => {
+            next(err);
+        });
+    }
 });
 app.get("/today/hourSaleAmount", function (req, res, next) {
     freshService.todayHourSaleAmount(req).then(data => {
@@ -97,11 +113,16 @@ app.get("/today/hourSaleAmount", function (req, res, next) {
     });
 });
 app.get("/today/categoryTop", function (req, res, next) {
-    freshService.todayCategoryTop(req).then(data => {
-        res.send(data);
-    }).catch(err => {
-        next(err);
-    });
+    let form_fields = req.form_fields;
+    if (_.has(form_fields, "displayCount") && !/^\d+$/.test(form_fields["displayCount"])) {
+        next("displayCount参数不正确displayCount=\\d+")
+    } else {
+        freshService.todayCategoryTop(req).then(data => {
+            res.send(data);
+        }).catch(err => {
+            next(err);
+        });
+    }
 });
 
 exports.app = app;

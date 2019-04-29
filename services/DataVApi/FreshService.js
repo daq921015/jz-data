@@ -227,6 +227,7 @@ class FreshService {
 
     todayBranchTop(req) {
         let result_obj;
+        let form_fields = req.form_fields;
         return ElasticSearchUtils.search_aggs({
             index: 'sale_' + req.session.user.partition_code,
             body: {
@@ -251,7 +252,7 @@ class FreshService {
                     "branch_group": {
                         "terms": {
                             "field": "branch_id",
-                            "size": 10,
+                            "size": form_fields["displayCount"] || 10,
                             "order": {
                                 "_count": "desc"
                             }
@@ -298,6 +299,7 @@ class FreshService {
 
     todayGoodsTop(req) {
         let result_obj;
+        let form_fields = req.form_fields;
         return ElasticSearchUtils.search_aggs({
             index: 'sale_detail_' + req.session.user.partition_code,
             body: {
@@ -322,7 +324,7 @@ class FreshService {
                     "goods_group": {
                         "terms": {
                             "field": "goods_id",
-                            "size": 15,
+                            "size": form_fields["displayCount"] || 15,
                             "order": {
                                 "_count": "desc"
                             }
@@ -435,9 +437,6 @@ class FreshService {
 
     nearDaysSaleAmount(req) {
         let form_fields = req.form_fields;
-        if (!_.has(form_fields, "days") || !_.isNumber(form_fields["days"])) {
-            return Promise.reject("时间天数(days)参数缺失或格式不正确")
-        }
         return ElasticSearchUtils.search_aggs({
             index: 'sale_' + req.session.user.partition_code,
             body: {
@@ -450,7 +449,7 @@ class FreshService {
                             {
                                 "range": {
                                     "create_at": {
-                                        "gte": moment().subtract(form_fields["days"], "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                                        "gte": moment().subtract(form_fields["displayCount"] || 30, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
                                         "format": "yyyy-MM-dd HH:mm:ss"
                                     }
                                 }
@@ -549,6 +548,7 @@ class FreshService {
 
     todayCategoryTop(req) {
         let result_obj;
+        let form_fields = req.form_fields;
         return ElasticSearchUtils.search_aggs({
             index: 'sale_detail_' + req.session.user.partition_code,
             body: {
@@ -573,7 +573,7 @@ class FreshService {
                     "category_group": {
                         "terms": {
                             "field": "category_id",
-                            "size": 5,
+                            "size": form_fields["displayCount"] || 5,
                             "order": {
                                 "_count": "desc"
                             }

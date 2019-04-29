@@ -20,8 +20,8 @@ config.myredis = {
 };
 //本程序运行依赖elasticsearch
 config.elasticsearch = {
-    // "host": "47.104.158.68:9200"
-    "host": "192.168.51.159:9200"
+    "host": "47.104.158.68:9200"
+    // "host": "192.168.51.159:9200"
 };
 //本程序运行依赖redis(会话信息)
 config.redis_session = _.extend({
