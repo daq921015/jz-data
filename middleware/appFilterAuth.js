@@ -19,6 +19,24 @@ module.exports = function (req, res, next) {
         next();
     } else if (req.session.islogin) {//登录之后放行
         next();
+    } else if (req_url == "fresh") { //生鲜大屏请求(没有登录特殊处理)
+        let form_fields = req.query;
+        let partitions = ["za1", "zd1"];
+        if (/\d+/.test(form_fields["tenantId"]) && _.contains(partitions, form_fields["partitionCode"])) {
+            req.query["isJson"] = true;
+            req.session.user = {
+                partition_code: form_fields["partitionCode"],
+                tenant_id: form_fields["tenantId"],
+                is_product: true
+            };
+            next();
+        } else {
+            res.send({
+                "status": "error",
+                "msg": "请求参数不正确(tenantId=\\d+&partitionCode=[za1|zd1])",
+                "data": ""
+            });
+        }
     } else {//重定向到登陆页
         if (_.has(req.cookies, "isLogin") && req.cookies["isLogin"] === 'true') {
             res.isSessionTimeOut = true;
