@@ -25,11 +25,11 @@ config.elasticsearch = {
 };
 //本程序运行依赖redis(会话信息)
 config.redis_session = _.extend({
-    "ttl": 28800,
+    "ttl": 3600 * 12,
     "logErrors": true
 }, config.myredis);
 //cookie保存时间
 config.cookie = {
-    "maxAge": 24 * 60 * 60 * 1000
+    "maxAge": 7 * 24 * 60 * 60 * 1000
 };
 module.exports = config;

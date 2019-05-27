@@ -10,6 +10,15 @@ app.get("/login", function (req, res) {
         res.render("login", {title: "登录页"});
     }
 });
+//大屏get登录，并跳转
+app.get("/loginFresh", function (req, res, next) {
+    publicService.login(req).then(user => {
+        res.cookie("isLogin", 'true');
+        res.redirect("https://datav.aliyuncs.com/share/c3bbb331b60434df4f7f7dbad8e2415e");
+    }).catch(err => {
+        next(err);
+    });
+});
 app.post("/login", function (req, res, next) {
     publicService.login(req).then(user => {
         res.cookie("isLogin", 'true');

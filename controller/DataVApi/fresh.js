@@ -12,6 +12,8 @@ let moment = devops.moment;
 let freshService = new devops.FreshService();
 
 let before = function (req, res, next) {
+    req.session._garbage = Date();
+    req.session.touch();
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.setHeader("Access-Control-Allow-Credentials", true);
     next(req.session.user.is_product ? "" : "非生产环境用户，不具有此模块功能");
@@ -123,6 +125,14 @@ app.get("/today/categoryTop", function (req, res, next) {
             next(err);
         });
     }
+});
+//今日客流（生鲜大屏）
+app.get("/today/ridership", function (req, res, next) {
+    freshService.todayRidership(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
 });
 
 exports.app = app;

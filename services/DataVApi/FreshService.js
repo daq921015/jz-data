@@ -8,6 +8,16 @@ let BusinessUtils = devops.BusinessUtils;
 
 class FreshService {
     constructor() {
+        this.period = {};
+        this.scope = {
+            1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0], 5: [0, 0],
+            6: [20, 40], 7: [70, 90], 8: [130, 150], 9: [120, 140], 10: [60, 80], 11: [70, 90],
+            12: [30, 50], 13: [40, 60], 14: [50, 70], 15: [70, 90], 16: [80, 100], 17: [90, 110],
+            18: [130, 150], 19: [70, 90], 20: [40, 60], 21: [20, 40],
+            22: [0, 0], 23: [0, 0], 24: [0, 0]
+        };
+        this.startHour = 6;
+        this.endHour = 21;
     }
 
     todaySaleAmount(req) {
@@ -618,6 +628,32 @@ class FreshService {
                 return -item.trade_amount;
             }));
         });
+    }
+
+    todayRidership(req) {
+        let result = [];
+        let nowHours = moment().utcOffset(8).hours();//当前小时
+        if (nowHours >= this.startHour) {//当前时间大于等于开始时间
+            let endHour = nowHours > this.endHour ? this.endHour : nowHours;//结束小时，不大于最大结束小时
+            let indexHour = this.startHour;//当前计算中小时
+            while (indexHour <= endHour) {
+                let min = this.scope[indexHour][0];//范围最小值
+                let max = this.scope[indexHour][1];//范围最大值
+                if (indexHour == endHour && _.has(this.period, indexHour)) {//当前小时，值不能小于上次获取值
+                    min = this.period[indexHour];
+                    this.period[indexHour] = Math.round(Math.random() * (max - min)) + min;
+                }
+                if (!_.has(this.period, indexHour)) {//没有存储过当前小时数
+                    this.period[indexHour] = Math.round(Math.random() * (max - min)) + min;
+                }
+                result.push({
+                    x: indexHour + "h",
+                    y: this.period[indexHour]
+                });
+                indexHour++;
+            }
+        }
+        return Promise.resolve(result)
     }
 }
 

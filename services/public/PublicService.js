@@ -8,6 +8,9 @@ class PublicService {
     }
 
     login(req) {
+        if (req.session.islogin) {
+            return Promise.resolve("用户已登录");
+        }
         let form_fields = req.form_fields;
         if (_.size(form_fields) !== 2) {
             return Promise.reject("用户名和密码不能为空");
