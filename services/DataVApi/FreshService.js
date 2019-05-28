@@ -633,6 +633,7 @@ class FreshService {
     todayRidership(req) {
         let result = [];
         let nowHours = moment().utcOffset(8).hours();//当前小时
+        let ratio = 7;//数据，数值倍数
         if (nowHours >= this.startHour) {//当前时间大于等于开始时间
             let endHour = nowHours > this.endHour ? this.endHour : nowHours;//结束小时，不大于最大结束小时
             let indexHour = this.startHour;//当前计算中小时
@@ -640,11 +641,13 @@ class FreshService {
                 let min = this.scope[indexHour][0];//范围最小值
                 let max = this.scope[indexHour][1];//范围最大值
                 if (indexHour == endHour && _.has(this.period, indexHour)) {//当前小时，值不能小于上次获取值
-                    min = this.period[indexHour];
-                    this.period[indexHour] = (Math.round(Math.random() * (max - min)) + min) * 6;
+                    min = Math.round(this.period[indexHour] / ratio);
+                    let value = Math.round((Math.random() * (max - min) + min) * ratio);
+                    this.period[indexHour] = value;
                 }
                 if (!_.has(this.period, indexHour)) {//没有存储过当前小时数
-                    this.period[indexHour] = (Math.round(Math.random() * (max - min)) + min) * 6;
+                    let value = Math.round((Math.random() * (max - min) + min) * ratio);
+                    this.period[indexHour] = value;
                 }
                 result.push({
                     x: indexHour + "h",
