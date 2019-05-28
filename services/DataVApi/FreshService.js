@@ -641,10 +641,10 @@ class FreshService {
                 let max = this.scope[indexHour][1];//范围最大值
                 if (indexHour == endHour && _.has(this.period, indexHour)) {//当前小时，值不能小于上次获取值
                     min = this.period[indexHour];
-                    this.period[indexHour] = Math.round(Math.random() * (max - min)) + min;
+                    this.period[indexHour] = (Math.round(Math.random() * (max - min)) + min) * 6;
                 }
                 if (!_.has(this.period, indexHour)) {//没有存储过当前小时数
-                    this.period[indexHour] = Math.round(Math.random() * (max - min)) + min;
+                    this.period[indexHour] = (Math.round(Math.random() * (max - min)) + min) * 6;
                 }
                 result.push({
                     x: indexHour + "h",
