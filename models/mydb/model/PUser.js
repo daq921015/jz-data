@@ -37,6 +37,9 @@ module.exports = function (sequelize, DataTypes) {
         is_product: {type: DataTypes.TINYINT.UNSIGNED, allowNull: false, defaultValue: 0},
         tenant_id: {type: DataTypes.BIGINT.UNSIGNED},
         tenant_name: {type: DataTypes.STRING},
+        branch_id: {type: DataTypes.BIGINT.UNSIGNED},
+        branch_name: {type: DataTypes.STRING},
+        commercial_type: {type: DataTypes.BIGINT.UNSIGNED},
         partition_code: {type: DataTypes.STRING},
         memo: {
             type: DataTypes.STRING(50),

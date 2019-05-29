@@ -20,34 +20,63 @@ class FreshService {
         this.endHour = 21;
     }
 
-    todaySaleAmount(req) {
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }]
-                    }
-                },
-                "aggs": {
-                    "sale_amount": {
-                        "sum": {
-                            "field": "received_amount"
-                        }
-                    }
-                },
-                "size": 0
+    _getCommonSearchCondition(req) {
+        let user = req.session.user;
+        let condition = [
+            {"term": {"tenant_id": user.tenant_id}},
+            {"term": {"is_deleted": false}}
+        ];
+        let where = {
+            tenant_id: user.tenant_id,
+            is_deleted: 0
+        };
+
+        if (user.commercial_type == 3) {//档口门店
+            where["parent_id"] = user.branch_id;
+        }
+        return Sequelize.getBusinessTableModel(1, user["partition_code"], "branch").then(Branch => {
+            return Branch.findAllCustom(where)
+        }).then(data => {
+            if (!data) {
+                return Promise.resolve([]);
             }
+            return Promise.resolve(_.pluck(data, "branch_id"));
+        }).then(Branchs => {
+            Branchs.push(user.branch_id);
+            condition.push({"terms": {"branch_id": Branchs}});
+            return condition;
+        })
+    }
+
+    todaySaleAmount(req) {
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
+                    }
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "sale_amount": {
+                            "sum": {
+                                "field": "received_amount"
+                            }
+                        }
+                    },
+                    "size": 0
+                }
+            })
         }).then(data => {
             return Promise.resolve([{
                 name: "",
@@ -57,25 +86,26 @@ class FreshService {
     }
 
     todaySaleCount(req) {
-        return ElasticSearchUtils.count({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
                 }
-            }
+            });
+            return ElasticSearchUtils.count({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    }
+                }
+            })
         }).then(data => {
             return Promise.resolve([{
                 name: "",
@@ -85,33 +115,34 @@ class FreshService {
     }
 
     todaySaleAmountPer(req) {
-        return ElasticSearchUtils.search({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "sale_amount": {
-                        "sum": {
-                            "field": "received_amount"
+                }
+            });
+            return ElasticSearchUtils.search({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "query": {
+                        "bool": {
+                            "must": must
                         }
-                    }
-                },
-                "size": 0
-            }
+                    },
+                    "aggs": {
+                        "sale_amount": {
+                            "sum": {
+                                "field": "received_amount"
+                            }
+                        }
+                    },
+                    "size": 0
+                }
+            })
         }).then(data => {
             let total = data["hits"]["total"];
             let sale_amount = data["aggregations"]["sale_amount"]["value"];
@@ -127,34 +158,35 @@ class FreshService {
     }
 
     yestodaySaleAmount(req) {
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "sale_amount": {
-                        "sum": {
-                            "field": "received_amount"
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "query": {
+                        "bool": {
+                            "must": must
                         }
-                    }
-                },
-                "size": 0
-            }
+                    },
+                    "aggs": {
+                        "sale_amount": {
+                            "sum": {
+                                "field": "received_amount"
+                            }
+                        }
+                    },
+                    "size": 0
+                }
+            })
         }).then(data => {
             return Promise.resolve([{
                 name: "",
@@ -164,26 +196,27 @@ class FreshService {
     }
 
     yestodaySaleCount(req) {
-        return ElasticSearchUtils.count({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
                 }
-            }
+            });
+            return ElasticSearchUtils.count({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    }
+                }
+            })
         }).then(data => {
             return Promise.resolve([{
                 name: "",
@@ -193,34 +226,35 @@ class FreshService {
     }
 
     yestodaySaleAmountPer(req) {
-        return ElasticSearchUtils.search({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "sale_amount": {
-                        "sum": {
-                            "field": "received_amount"
+                }
+            });
+            return ElasticSearchUtils.search({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "query": {
+                        "bool": {
+                            "must": must
                         }
-                    }
-                },
-                "size": 0
-            }
+                    },
+                    "aggs": {
+                        "sale_amount": {
+                            "sum": {
+                                "field": "received_amount"
+                            }
+                        }
+                    },
+                    "size": 0
+                }
+            })
         }).then(data => {
             let total = data["hits"]["total"];
             let sale_amount = data["aggregations"]["sale_amount"]["value"];
@@ -238,45 +272,45 @@ class FreshService {
     todayBranchTop(req) {
         let result_obj;
         let form_fields = req.form_fields;
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "size": 0,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }
-                        ]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "branch_group": {
-                        "terms": {
-                            "field": "branch_id",
-                            "size": form_fields["displayCount"] || 10,
-                            "order": {
-                                "_count": "desc"
-                            }
-                        },
-                        "aggs": {
-                            "sale_amount": {
-                                "sum": {
-                                    "field": "received_amount"
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "branch_group": {
+                            "terms": {
+                                "field": "branch_id",
+                                "size": form_fields["displayCount"] || 10,
+                                "order": {
+                                    "sale_amount": "desc"
+                                }
+                            },
+                            "aggs": {
+                                "sale_amount": {
+                                    "sum": {
+                                        "field": "received_amount"
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            })
         }).then(data => {
             let buckets = data["branch_group"]["buckets"];
             let branch_ids = [];
@@ -310,45 +344,45 @@ class FreshService {
     todayGoodsTop(req) {
         let result_obj;
         let form_fields = req.form_fields;
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_detail_' + req.session.user.partition_code,
-            body: {
-                "size": 0,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }
-                        ]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "goods_group": {
-                        "terms": {
-                            "field": "goods_id",
-                            "size": form_fields["displayCount"] || 15,
-                            "order": {
-                                "_count": "desc"
-                            }
-                        },
-                        "aggs": {
-                            "sale_amount": {
-                                "sum": {
-                                    "field": "received_amount"
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_detail_' + req.session.user.partition_code,
+                body: {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "goods_group": {
+                            "terms": {
+                                "field": "goods_id",
+                                "size": form_fields["displayCount"] || 15,
+                                "order": {
+                                    "sale_amount": "desc"
+                                }
+                            },
+                            "aggs": {
+                                "sale_amount": {
+                                    "sum": {
+                                        "field": "received_amount"
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            })
         }).then(data => {
             let buckets = data["goods_group"]["buckets"];
             let goods_ids = [];
@@ -380,42 +414,42 @@ class FreshService {
 
     todayPaymentAmount(req) {
         let result_obj;
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_payment_' + req.session.user.partition_code,
-            body: {
-                "size": 0,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": {"value": false}}},
-                            {
-                                "range": {
-                                    "payment_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }
-                        ]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "payment_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "payment_group": {
-                        "terms": {
-                            "field": "payment_id",
-                            "size": 1000
-                        },
-                        "aggs": {
-                            "sale_amount": {
-                                "sum": {
-                                    "field": "amount"
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_payment_' + req.session.user.partition_code,
+                body: {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "payment_group": {
+                            "terms": {
+                                "field": "payment_id",
+                                "size": 1000
+                            },
+                            "aggs": {
+                                "sale_amount": {
+                                    "sum": {
+                                        "field": "amount"
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            })
         }).then(data => {
             let buckets = data["payment_group"]["buckets"];
             let payment_ids = [];
@@ -447,45 +481,45 @@ class FreshService {
 
     nearDaysSaleAmount(req) {
         let form_fields = req.form_fields;
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "size": 0,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().subtract(form_fields["displayCount"] || 30, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().subtract(form_fields["displayCount"] || 30, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
+                    }
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "groupDate": {
+                            "date_histogram": {
+                                "field": "create_at",
+                                "interval": "day",
+                                "format": "dd",
+                                "time_zone": "Asia/Shanghai"
+                            },
+                            "aggs": {
+                                "sale_amount": {
+                                    "sum": {
+                                        "field": "received_amount"
                                     }
                                 }
                             }
-                        ]
-                    }
-                },
-                "aggs": {
-                    "groupDate": {
-                        "date_histogram": {
-                            "field": "create_at",
-                            "interval": "day",
-                            "format": "dd",
-                            "time_zone": "Asia/Shanghai"
-                        },
-                        "aggs": {
-                            "sale_amount": {
-                                "sum": {
-                                    "field": "received_amount"
-                                }
-                            }
                         }
-                    }
-                },
-                "sort": [{"create_at": "asc"}]
-            }
+                    },
+                    "sort": [{"create_at": "asc"}]
+                }
+            })
         }).then(data => {
             let result = [];
             data["groupDate"]["buckets"].forEach(function (item) {
@@ -502,45 +536,45 @@ class FreshService {
     }
 
     todayHourSaleAmount(req) {
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_' + req.session.user.partition_code,
-            body: {
-                "size": 0,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
+                    }
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "groupDate": {
+                            "date_histogram": {
+                                "field": "create_at",
+                                "interval": "hour",
+                                "format": "HH",
+                                "time_zone": "Asia/Shanghai"
+                            },
+                            "aggs": {
+                                "sale_amount": {
+                                    "sum": {
+                                        "field": "received_amount"
                                     }
                                 }
                             }
-                        ]
-                    }
-                },
-                "aggs": {
-                    "groupDate": {
-                        "date_histogram": {
-                            "field": "create_at",
-                            "interval": "hour",
-                            "format": "HH",
-                            "time_zone": "Asia/Shanghai"
-                        },
-                        "aggs": {
-                            "sale_amount": {
-                                "sum": {
-                                    "field": "received_amount"
-                                }
-                            }
                         }
-                    }
-                },
-                "sort": [{"create_at": "asc"}]
-            }
+                    },
+                    "sort": [{"create_at": "asc"}]
+                }
+            })
         }).then(data => {
             let result = [];
             data["groupDate"]["buckets"].forEach(function (item) {
@@ -559,45 +593,45 @@ class FreshService {
     todayCategoryTop(req) {
         let result_obj;
         let form_fields = req.form_fields;
-        return ElasticSearchUtils.search_aggs({
-            index: 'sale_detail_' + req.session.user.partition_code,
-            body: {
-                "size": 0,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"tenant_id": req.session.user.tenant_id}},
-                            {"term": {"is_deleted": false}},
-                            {
-                                "range": {
-                                    "create_at": {
-                                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                                        "format": "yyyy-MM-dd HH:mm:ss"
-                                    }
-                                }
-                            }
-                        ]
+        let that = this;
+        return that._getCommonSearchCondition(req).then(must => {
+            must.push({
+                "range": {
+                    "create_at": {
+                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss"
                     }
-                },
-                "aggs": {
-                    "category_group": {
-                        "terms": {
-                            "field": "category_id",
-                            "size": form_fields["displayCount"] || 5,
-                            "order": {
-                                "_count": "desc"
-                            }
-                        },
-                        "aggs": {
-                            "sale_amount": {
-                                "sum": {
-                                    "field": "received_amount"
+                }
+            });
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_detail_' + req.session.user.partition_code,
+                body: {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": must
+                        }
+                    },
+                    "aggs": {
+                        "category_group": {
+                            "terms": {
+                                "field": "category_id",
+                                "size": form_fields["displayCount"] || 5,
+                                "order": {
+                                    "sale_amount": "desc"
+                                }
+                            },
+                            "aggs": {
+                                "sale_amount": {
+                                    "sum": {
+                                        "field": "received_amount"
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            })
         }).then(data => {
             let buckets = data["category_group"]["buckets"];
             let category_ids = [];
