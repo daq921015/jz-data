@@ -42,6 +42,7 @@ class FreshService {
         };
         this.startHour = 6;
         this.endHour = 21;
+        this.aggsSize = 50;
     }
 
     _getCommonSearchCondition(req) {
@@ -78,8 +79,9 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -94,7 +96,10 @@ class FreshService {
                     "aggs": {
                         "sale_amount": {
                             "sum": {
-                                "field": "received_amount"
+                                "script": {
+                                    "lang": "painless",
+                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                }
                             }
                         }
                     },
@@ -115,8 +120,9 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -144,8 +150,9 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -160,7 +167,10 @@ class FreshService {
                     "aggs": {
                         "sale_amount": {
                             "sum": {
-                                "field": "received_amount"
+                                "script": {
+                                    "lang": "painless",
+                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                }
                             }
                         }
                     },
@@ -187,9 +197,10 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().subtract(1, "day").startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "lte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -204,7 +215,10 @@ class FreshService {
                     "aggs": {
                         "sale_amount": {
                             "sum": {
-                                "field": "received_amount"
+                                "script": {
+                                    "lang": "painless",
+                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                }
                             }
                         }
                     },
@@ -225,9 +239,10 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().subtract(1, "day").startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "lte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -255,9 +270,10 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().subtract(1, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "lte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().subtract(1, "day").startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "lte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -272,7 +288,10 @@ class FreshService {
                     "aggs": {
                         "sale_amount": {
                             "sum": {
-                                "field": "received_amount"
+                                "script": {
+                                    "lang": "painless",
+                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                }
                             }
                         }
                     },
@@ -301,39 +320,44 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
-            return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
-                body: {
-                    "size": 0,
-                    "query": {
-                        "bool": {
-                            "must": must
-                        }
-                    },
-                    "aggs": {
-                        "branch_group": {
-                            "terms": {
-                                "field": "branch_id",
-                                "size": form_fields["displayCount"] || 10,
-                                "order": {
-                                    "sale_amount": "desc"
-                                }
-                            },
-                            "aggs": {
-                                "sale_amount": {
-                                    "sum": {
-                                        "field": "received_amount"
+            let body = {
+                "size": 0,
+                "query": {
+                    "bool": {
+                        "must": must
+                    }
+                },
+                "aggs": {
+                    "branch_group": {
+                        "terms": {
+                            "field": "branch_id",
+                            "size": that.aggsSize,
+                            "order": {
+                                "sale_amount": "desc"
+                            }
+                        },
+                        "aggs": {
+                            "sale_amount": {
+                                "sum": {
+                                    "script": {
+                                        "lang": "painless",
+                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                     }
                                 }
                             }
                         }
                     }
                 }
+            };
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: body
             })
         }).then(data => {
             let buckets = data["branch_group"]["buckets"];
@@ -359,9 +383,10 @@ class FreshService {
             data.forEach(function (item) {//添加门店信息
                 if (_.has(result_obj, item["id"])) result_obj[item["id"]]["branch_name"] = item["name"];
             });
-            return Promise.resolve(_.sortBy(_.values(result_obj), function (item) {
+            let obj = _.sortBy(_.values(result_obj), function (item) {
                 return -item.trade_amount;
-            }));
+            });
+            return Promise.resolve(obj.slice(0, form_fields["displayCount"] || 10));
         });
     }
 
@@ -373,39 +398,44 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf("day").format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
-            return ElasticSearchUtils.search_aggs({
-                index: 'sale_detail_' + req.session.user.partition_code,
-                body: {
-                    "size": 0,
-                    "query": {
-                        "bool": {
-                            "must": must
-                        }
-                    },
-                    "aggs": {
-                        "goods_group": {
-                            "terms": {
-                                "field": "goods_id",
-                                "size": form_fields["displayCount"] || 15,
-                                "order": {
-                                    "sale_amount": "desc"
-                                }
-                            },
-                            "aggs": {
-                                "sale_amount": {
-                                    "sum": {
-                                        "field": "received_amount"
+            let body = {
+                "size": 0,
+                "query": {
+                    "bool": {
+                        "must": must
+                    }
+                },
+                "aggs": {
+                    "goods_group": {
+                        "terms": {
+                            "field": "goods_id",
+                            "size": that.aggsSize,
+                            "order": {
+                                "sale_amount": "desc"
+                            }
+                        },
+                        "aggs": {
+                            "sale_amount": {
+                                "sum": {
+                                    "script": {
+                                        "lang": "painless",
+                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                     }
                                 }
                             }
                         }
                     }
                 }
+            };
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_detail_' + req.session.user.partition_code,
+                body: body
             })
         }).then(data => {
             let buckets = data["goods_group"]["buckets"];
@@ -430,9 +460,10 @@ class FreshService {
             data.forEach(function (item) {//添加商品信息
                 if (_.has(result_obj, item["id"])) result_obj[item["id"]]["goods_name"] = item["goods_name"];
             });
-            return Promise.resolve(_.sortBy(_.values(result_obj), function (item) {
+            let obj = _.sortBy(_.values(result_obj), function (item) {
                 return -item.trade_amount;
-            }));
+            });
+            return Promise.resolve(obj.slice(0, form_fields["displayCount"] || 15));
         });
     }
 
@@ -443,8 +474,9 @@ class FreshService {
             must.push({
                 "range": {
                     "payment_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf('day').format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -510,8 +542,9 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().subtract(form_fields["displayCount"] || 30, "day").startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().subtract(form_fields["displayCount"] || 30, "day").startOf('day').format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -535,7 +568,10 @@ class FreshService {
                             "aggs": {
                                 "sale_amount": {
                                     "sum": {
-                                        "field": "received_amount"
+                                        "script": {
+                                            "lang": "painless",
+                                            "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                        }
                                     }
                                 }
                             }
@@ -565,39 +601,44 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf('day').format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
-            return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
-                body: {
-                    "size": 0,
-                    "query": {
-                        "bool": {
-                            "must": must
-                        }
-                    },
-                    "aggs": {
-                        "groupDate": {
-                            "date_histogram": {
-                                "field": "create_at",
-                                "interval": "hour",
-                                "format": "HH",
-                                "time_zone": "Asia/Shanghai"
-                            },
-                            "aggs": {
-                                "sale_amount": {
-                                    "sum": {
-                                        "field": "received_amount"
+            let body = {
+                "size": 0,
+                "query": {
+                    "bool": {
+                        "must": must
+                    }
+                },
+                "aggs": {
+                    "groupDate": {
+                        "date_histogram": {
+                            "field": "create_at",
+                            "interval": "hour",
+                            "format": "HH",
+                            "time_zone": "Asia/Shanghai"
+                        },
+                        "aggs": {
+                            "sale_amount": {
+                                "sum": {
+                                    "script": {
+                                        "lang": "painless",
+                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                     }
                                 }
                             }
                         }
-                    },
-                    "sort": [{"create_at": "asc"}]
-                }
+                    }
+                },
+                "sort": [{"create_at": "asc"}]
+            };
+            return ElasticSearchUtils.search_aggs({
+                index: 'sale_' + req.session.user.partition_code,
+                body: body
             })
         }).then(data => {
             let result = [];
@@ -622,8 +663,9 @@ class FreshService {
             must.push({
                 "range": {
                     "create_at": {
-                        "gte": moment().startOf('day').subtract(8, "hour").format("YYYY-MM-DD HH:mm:ss"),
-                        "format": "yyyy-MM-dd HH:mm:ss"
+                        "gte": moment().startOf('day').format("YYYY-MM-DD HH:mm:ss"),
+                        "format": "yyyy-MM-dd HH:mm:ss",
+                        "time_zone": "Asia/Shanghai"
                     }
                 }
             });
@@ -640,7 +682,7 @@ class FreshService {
                         "category_group": {
                             "terms": {
                                 "field": "category_id",
-                                "size": form_fields["displayCount"] || 5,
+                                "size": that.aggsSize,
                                 "order": {
                                     "sale_amount": "desc"
                                 }
@@ -648,7 +690,10 @@ class FreshService {
                             "aggs": {
                                 "sale_amount": {
                                     "sum": {
-                                        "field": "received_amount"
+                                        "script": {
+                                            "lang": "painless",
+                                            "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                        }
                                     }
                                 }
                             }
@@ -682,9 +727,10 @@ class FreshService {
                     result_obj[item["id"]]["cat_code"] = item["cat_code"];
                 }
             });
-            return Promise.resolve(_.sortBy(_.values(result_obj), function (item) {
+            let obj = _.sortBy(_.values(result_obj), function (item) {
                 return -item.trade_amount;
-            }));
+            });
+            return Promise.resolve(obj.slice(0, form_fields["displayCount"] || 5));
         });
     }
 
