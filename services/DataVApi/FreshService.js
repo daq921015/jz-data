@@ -5,6 +5,30 @@ let models = devopsdb.models;
 let moment = devops.moment;
 let ElasticSearchUtils = devops.ElasticsearchUtils;
 let BusinessUtils = devops.BusinessUtils;
+let _getRequestParams = function (time) {
+    let secret = "a769d6bceb7db943ae58b28ae4637ad0";
+    let orgid = "159";
+    let depId = "43266";
+    let config = {
+        "_aid": 'S107',                                // 开放平台系统编号
+        "_akey": 'S107-00000095',                      // 万店掌开放平台分配给第三方的开发者key
+        "_mt": 'open.face.passengerflow.getShopDailyPassengers',                                  // 接口名称
+        "_sm": 'md5',                                  // 签名算法 md5,sha1
+        "_requestMode": 'post',                         // 请求方式post,get
+        "_version": 'v2',                              // 版本号
+        "_timestamp": new Date().format('yyyyMMddhhmmss'),
+        "orgid": orgid,
+        "depId": depId,
+        "time": time
+    };
+    let signValue = '', keyArr = Object.keys(config).sort();
+    keyArr.forEach(item => {
+        signValue += item + config[item]
+    });
+    signValue = secret + signValue + secret;
+    config["_sig"] = devops.CryptoJS.MD5(signValue).toString().toUpperCase();
+    return config;
+};
 
 class FreshService {
     constructor() {
@@ -665,32 +689,59 @@ class FreshService {
     }
 
     todayRidership(req) {
-        let result = [];
-        let nowHours = moment().utcOffset(8).hours();//当前小时
-        let ratio = 7;//数据，数值倍数
-        if (nowHours >= this.startHour) {//当前时间大于等于开始时间
-            let endHour = nowHours > this.endHour ? this.endHour : nowHours;//结束小时，不大于最大结束小时
-            let indexHour = this.startHour;//当前计算中小时
-            while (indexHour <= endHour) {
-                let min = this.scope[indexHour][0];//范围最小值
-                let max = this.scope[indexHour][1];//范围最大值
-                if (indexHour == endHour && _.has(this.period, indexHour)) {//当前小时，值不能小于上次获取值
-                    min = Math.round(this.period[indexHour] / ratio);
-                    let value = Math.round((Math.random() * (max - min) + min) * ratio);
-                    this.period[indexHour] = value;
-                }
-                if (!_.has(this.period, indexHour)) {//没有存储过当前小时数
-                    let value = Math.round((Math.random() * (max - min) + min) * ratio);
-                    this.period[indexHour] = value;
-                }
-                result.push({
-                    x: indexHour + "h",
-                    y: this.period[indexHour]
+        let time = devops.moment().format("YYYY-MM-DD");
+        let data = _getRequestParams(time);
+        return devops.request_promise({
+            url: "http://openapi.ovopark.com/m.api",
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            form: data
+        }).then(data => {
+            let obj = JSON.parse(data);
+            if (obj["result"] == "成功") {
+                let list = obj["data"];
+                let result = [];
+                list.forEach(function (item, index) {
+                    result.push({
+                        x: index + "h",
+                        y: item["customerNum"]
+                    });
                 });
-                indexHour++;
+                return Promise.resolve(result);
+            } else {
+                devops.publicmethod.logInfo(data);
+                return Promise.reject("请求客流量接口失败")
             }
-        }
-        return Promise.resolve(result)
+        });
+        // let result = [];
+        // let nowHours = moment().utcOffset(8).hours();//当前小时
+        // let ratio = 7;//数据，数值倍数
+        // if (nowHours >= this.startHour) {//当前时间大于等于开始时间
+        //     let endHour = nowHours > this.endHour ? this.endHour : nowHours;//结束小时，不大于最大结束小时
+        //     let indexHour = this.startHour;//当前计算中小时
+        //     while (indexHour <= endHour) {
+        //         let min = this.scope[indexHour][0];//范围最小值
+        //         let max = this.scope[indexHour][1];//范围最大值
+        //         if (indexHour == endHour && _.has(this.period, indexHour)) {//当前小时，值不能小于上次获取值
+        //             min = Math.round(this.period[indexHour] / ratio);
+        //             let value = Math.round((Math.random() * (max - min) + min) * ratio);
+        //             this.period[indexHour] = value;
+        //         }
+        //         if (!_.has(this.period, indexHour)) {//没有存储过当前小时数
+        //             let value = Math.round((Math.random() * (max - min) + min) * ratio);
+        //             this.period[indexHour] = value;
+        //         }
+        //         result.push({
+        //             x: indexHour + "h",
+        //             y: this.period[indexHour]
+        //         });
+        //         indexHour++;
+        //     }
+        // }
+        // return Promise.resolve(result)
     }
 }
 

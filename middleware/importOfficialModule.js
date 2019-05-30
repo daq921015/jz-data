@@ -23,4 +23,5 @@ module.exports = function () {
     devops.moment = require("moment");
     devops.session = require("express-session");//用来处理session
     devops.RedisStrore = require("connect-redis")(devops.session);//用来处理session
+    devops.request_promise = require("request-promise");//http/https请求
 };
