@@ -707,7 +707,7 @@ class FreshService {
                 list.forEach(function (item, index) {
                     result.push({
                         x: index + "h",
-                        y: item["customerNum"]
+                        y: item["regularNum"] + item["suspectNum"] + item["customerNum"] + item["workerNum"] + item["vipNum"]
                     });
                 });
                 return Promise.resolve(result);
