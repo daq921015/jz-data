@@ -30,6 +30,6 @@ config.redis_session = _.extend({
 }, config.myredis);
 //cookie保存时间
 config.cookie = {
-    "maxAge": 7 * 24 * 60 * 60 * 1000
+    "maxAge": 365 * 24 * 60 * 60 * 1000
 };
 module.exports = config;

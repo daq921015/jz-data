@@ -22,6 +22,7 @@ module.exports = app => {
                 res.render('sessionTimeOut');
             }
         } else {
+            devops.publicmethod.logError("异常请求URL：" + req.url + "-----------异常请求ip：" + req.ip);
             let err_msg = devops.publicmethod.logError(err);
             if (_.has(req.form_fields, "isJson") && req.form_fields["isJson"]) {
                 if (app.get("env") === "development") {

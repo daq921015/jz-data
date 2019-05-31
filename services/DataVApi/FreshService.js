@@ -347,7 +347,7 @@ class FreshService {
                                 "sum": {
                                     "script": {
                                         "lang": "painless",
-                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;} else {return doc["received_amount"].value;}'
                                     }
                                 }
                             }
