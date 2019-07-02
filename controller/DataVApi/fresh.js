@@ -134,6 +134,14 @@ app.get("/today/ridership", function (req, res, next) {
         next(err);
     });
 });
+//今日商品抽检（生鲜大屏）
+app.get("/today/goodsCheck", function (req, res, next) {
+    freshService.todayGoodsCheck(req).then(data => {
+        res.send(data);
+    }).catch(err => {
+        next(err);
+    });
+});
 
 exports.app = app;
 exports.before = before;

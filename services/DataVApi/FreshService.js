@@ -32,18 +32,55 @@ let _getRequestParams = function (time) {
 
 class FreshService {
     constructor() {
-        this.period = {};
-        this.scope = {
-            1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0], 5: [0, 0],
-            6: [20, 40], 7: [70, 90], 8: [130, 150], 9: [120, 140], 10: [60, 80], 11: [70, 90],
-            12: [30, 50], 13: [40, 60], 14: [50, 70], 15: [70, 90], 16: [80, 100], 17: [90, 110],
-            18: [130, 150], 19: [70, 90], 20: [40, 60], 21: [20, 40],
-            22: [0, 0], 23: [0, 0], 24: [0, 0]
-        };
-        this.startHour = 6;
-        this.endHour = 21;
+        // this.period = {};
+        // this.scope = {
+        //     1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0], 5: [0, 0],
+        //     6: [20, 40], 7: [70, 90], 8: [130, 150], 9: [120, 140], 10: [60, 80], 11: [70, 90],
+        //     12: [30, 50], 13: [40, 60], 14: [50, 70], 15: [70, 90], 16: [80, 100], 17: [90, 110],
+        //     18: [130, 150], 19: [70, 90], 20: [40, 60], 21: [20, 40],
+        //     22: [0, 0], 23: [0, 0], 24: [0, 0]
+        // };
+        // this.startHour = 6;
+        // this.endHour = 21;
         this.aggsSize = 50;
+        this.branch = ["胡军容", "代玉建", "桂云龙", "薛丹均", "李永珍", "陆国秀",
+            "杜兴营", "周江成", "李海林", "高凤林", "陈寿奎", "陈小霞",
+            "杨廷宇", "谭小强", "陈长春", "安涛", "盘娇",
+            "马军", "杜江", "陈胜"];
+        this.goods = [
+            "毛豆", "花椒", "广胡", "青椒", "红椒", "红菜椒",
+            "红小米", "青小米", "红美人椒", "二筋条", "黄皮大尖椒", "芹菜",
+            "青芹菜", "本地黄瓜", "苦瓜", "丝瓜", "小黄瓜", "日本南瓜",
+            "癞子瓜", "西红柿", "连枝西红柿", "茄子", "精品茄子", "白萝卜",
+            "茭头", "蒜苔", "新蒜苔", "黄葱", "大葱", "小葱", "蒜苗",
+            "白洋葱", "洋葱", "鲜花生", "鲜花椒", "白芹菜", "生姜",
+            "板姜", "仔姜", "老姜", "大蒜", "新大蒜", "独头蒜", "芦笋",
+            "春芽", "苦茭", "云南水白菜", "云南上海青", "水白菜苔", "瓢白菜苔",
+            "水藤菜", "苕尖", "马思汉", "大香菜", "西兰花", "娃娃菜",
+            "菜心", "茼蒿", "油菜心", "青菜", "汉菜", "冬汉菜",
+            "木耳菜", "血皮菜", "芥兰", "莴笋", "本地莴笋",
+            "牛皮菜", "青菜头", "香菜", "韭菜", "西芹", "韭黄",
+            "韭菜花", "南瓜", "冬瓜", "小米冬瓜", "黄瓜", "青瓜",
+            "付子瓜", "嫩南瓜", "嫩圆瓜", "大白菜", "卷心菜", "牛心白",
+            "散花菜", "花菜", "白地瓜", "玉米", "豌豆角", "豌豆粒", "胡豆角",
+            "胡豆粒", "豇豆", "四季豆", "无筋豆", "大扁豆", "荷兰豆",
+            "精品土豆", "土豆", "红苕", "临时商品", "紫苕", "芋儿",
+            "香芋", "山药", "铁棍山药", "莲藕", "竹笋", "胡萝卜", "云南油麦菜", "云南生菜"
+        ];
+        this.check = {};
     }
+
+    //从数组中随机去元素
+    _getRandomArrayElements(arr, count) {
+        let shuffled = arr.slice(0), i = arr.length, min = i - count, temp, index;
+        while (i-- > min) {
+            index = Math.floor((i + 1) * Math.random());
+            temp = shuffled[index];
+            shuffled[index] = shuffled[i];
+            shuffled[i] = temp;
+        }
+        return shuffled.slice(min);
+    };
 
     _getCommonSearchCondition(req) {
         let user = req.session.user;
@@ -788,6 +825,28 @@ class FreshService {
         //     }
         // }
         // return Promise.resolve(result)
+    }
+
+    todayGoodsCheck(req) {
+        let that = this;
+        let date = devops.moment().format("YYYY-MM-DD");
+        if (_.has(that.check, date)) {
+            return Promise.resolve(that.check[date]);
+        }
+        let count = Math.floor(Math.random() * (20 - 15 + 1)) + 15;
+        let goods = that._getRandomArrayElements(that.goods, count);
+        let branch = that._getRandomArrayElements(that.branch, count);
+        let result = [];
+        goods.forEach(function (item, index) {
+            result.push({
+                goods_name: item,
+                branch_name: branch[index],
+                result: "合格"
+            })
+        });
+        that.check = {};
+        that.check[date] = result;
+        return Promise.resolve(that.check[date]);
     }
 }
 
