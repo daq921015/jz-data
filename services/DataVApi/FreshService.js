@@ -5,10 +5,29 @@ let models = devopsdb.models;
 let moment = devops.moment;
 let ElasticSearchUtils = devops.ElasticsearchUtils;
 let BusinessUtils = devops.BusinessUtils;
-let _getRequestParams = function (time) {
+let _getRequestParams = function (time, req) {
     let secret = "a769d6bceb7db943ae58b28ae4637ad0";
+    let tenant_id = req.session.user.tenant_id;
+    let param = {
+        "19673": {
+            orgid: "159",
+            depId: "43266",
+            enterpriseId: "3762"
+        },
+        "24238": {//市场重庆正昇海鲜
+            orgid: "159",
+            depId: "50519",
+            enterpriseId: " 4323"
+        },
+    };
     let orgid = "159";
     let depId = "43266";
+    let enterpriseId = "3762";
+    if (_.has(param, tenant_id)) {
+        orgid = param[tenant_id]["orgid"];
+        depId = param[tenant_id]["depId"];
+        enterpriseId = param[tenant_id]["enterpriseId"];
+    }
     let config = {
         "_aid": 'S107',                                // 开放平台系统编号
         "_akey": 'S107-00000095',                      // 万店掌开放平台分配给第三方的开发者key
@@ -19,6 +38,7 @@ let _getRequestParams = function (time) {
         "_timestamp": new Date().format('yyyyMMddhhmmss'),
         "orgid": orgid,
         "depId": depId,
+        "ovoparkEnterpriseId": enterpriseId,
         "time": time
     };
     let signValue = '', keyArr = Object.keys(config).sort();
@@ -773,7 +793,7 @@ class FreshService {
 
     todayRidership(req) {
         let time = devops.moment().format("YYYY-MM-DD");
-        let data = _getRequestParams(time);
+        let data = _getRequestParams(time, req);
         return devops.request_promise({
             url: "http://openapi.ovopark.com/m.api",
             method: "POST",
