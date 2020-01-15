@@ -106,7 +106,7 @@ class FreshService {
         let user = req.session.user;
         let condition = [
             {"term": {"tenant_id": user.tenant_id}},
-            {"term": {"is_deleted": false}}
+            {"term": {"is_deleted": 0}}
         ];
         let where = {
             tenant_id: user.tenant_id,
@@ -143,7 +143,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: {
                     "query": {
                         "bool": {
@@ -155,7 +155,7 @@ class FreshService {
                             "sum": {
                                 "script": {
                                     "lang": "painless",
-                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                    "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                 }
                             }
                         }
@@ -184,7 +184,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.count({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: {
                     "query": {
                         "bool": {
@@ -213,29 +213,30 @@ class FreshService {
                     }
                 }
             });
-            return ElasticSearchUtils.search({
-                index: 'sale_' + req.session.user.partition_code,
-                body: {
-                    "query": {
-                        "bool": {
-                            "must": must
-                        }
-                    },
-                    "aggs": {
-                        "sale_amount": {
-                            "sum": {
-                                "script": {
-                                    "lang": "painless",
-                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
-                                }
+            let body = {
+                "query": {
+                    "bool": {
+                        "must": must
+                    }
+                },
+                "aggs": {
+                    "sale_amount": {
+                        "sum": {
+                            "script": {
+                                "lang": "painless",
+                                "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                             }
                         }
-                    },
-                    "size": 0
-                }
+                    }
+                },
+                "size": 0
+            };
+            return ElasticSearchUtils.search({
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
+                body: body
             })
         }).then(data => {
-            let total = data["hits"]["total"];
+            let total = data["hits"]["total"]["value"];
             let sale_amount = data["aggregations"]["sale_amount"]["value"];
             let result = 0;
             if (total != 0 && sale_amount != 0) {
@@ -262,7 +263,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: {
                     "query": {
                         "bool": {
@@ -274,7 +275,7 @@ class FreshService {
                             "sum": {
                                 "script": {
                                     "lang": "painless",
-                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                    "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                 }
                             }
                         }
@@ -304,7 +305,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.count({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: {
                     "query": {
                         "bool": {
@@ -335,7 +336,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.search({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: {
                     "query": {
                         "bool": {
@@ -347,7 +348,7 @@ class FreshService {
                             "sum": {
                                 "script": {
                                     "lang": "painless",
-                                    "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                    "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                 }
                             }
                         }
@@ -356,7 +357,7 @@ class FreshService {
                 }
             })
         }).then(data => {
-            let total = data["hits"]["total"];
+            let total = data["hits"]["total"]["value"];
             let sale_amount = data["aggregations"]["sale_amount"]["value"];
             let result = 0;
             if (total != 0 && sale_amount != 0) {
@@ -404,7 +405,7 @@ class FreshService {
                                 "sum": {
                                     "script": {
                                         "lang": "painless",
-                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;} else {return doc["received_amount"].value;}'
+                                        "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;} else {return doc["received_amount"].value;}'
                                     }
                                 }
                             }
@@ -413,7 +414,7 @@ class FreshService {
                 }
             };
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: body
             })
         }).then(data => {
@@ -482,7 +483,7 @@ class FreshService {
                                 "sum": {
                                     "script": {
                                         "lang": "painless",
-                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                        "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                     }
                                 }
                             }
@@ -491,7 +492,7 @@ class FreshService {
                 }
             };
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_detail_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale_detail',
                 body: body
             })
         }).then(data => {
@@ -538,7 +539,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_payment_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale_payment',
                 body: {
                     "size": 0,
                     "query": {
@@ -606,7 +607,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: {
                     "size": 0,
                     "query": {
@@ -627,7 +628,7 @@ class FreshService {
                                     "sum": {
                                         "script": {
                                             "lang": "painless",
-                                            "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                            "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                         }
                                     }
                                 }
@@ -684,7 +685,7 @@ class FreshService {
                                 "sum": {
                                     "script": {
                                         "lang": "painless",
-                                        "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                        "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                     }
                                 }
                             }
@@ -694,7 +695,7 @@ class FreshService {
                 "sort": [{"create_at": "asc"}]
             };
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale',
                 body: body
             })
         }).then(data => {
@@ -727,7 +728,7 @@ class FreshService {
                 }
             });
             return ElasticSearchUtils.search_aggs({
-                index: 'sale_detail_' + req.session.user.partition_code,
+                index: "www_ali-" + req.session.user.partition_code + '-sale_detail',
                 body: {
                     "size": 0,
                     "query": {
@@ -749,7 +750,7 @@ class FreshService {
                                     "sum": {
                                         "script": {
                                             "lang": "painless",
-                                            "source": 'if(doc["is_refund"].value){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
+                                            "source": 'if(doc["is_refund"].value == 1){return -doc["received_amount"].value;}else{return doc["received_amount"].value;}'
                                         }
                                     }
                                 }
